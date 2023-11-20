@@ -29,16 +29,14 @@ const Home = () => {
   const [producto, setProducto] = useState<IProducto>({
     id: '',
     nombre: '',
-    descripcion: '',
-    imagen: '',
-    precio: 0,
+    cantidad: 0,
+    fecha_vencimiento: '',
 
   })
 
   const [oportunidades, setOportunidades] = useState([])
   const [errorResponse, setErrorResponse] = useState("")
   const [date, setDate] = useState<Date | null | undefined>(null)
-  const [img, setImg] = useState<File | null>(null)
   const CustomInput = forwardRef((props, ref) => {
     return <TextField fullWidth {...props} inputRef={ref} label='Birth Date' autoComplete='off' />
   })
@@ -47,7 +45,7 @@ const Home = () => {
     getCompanyData();
   }, [])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const {name, value} = e.target;
     setProducto({
       ...producto,
@@ -56,7 +54,7 @@ const Home = () => {
   }
 
 
-  const handleChangeSelect = (e: SelectChangeEvent) => {
+  const handleChangeSelect = (e:) => {
     const {name, value} = e.target;
     setProducto({
       ...producto,
@@ -69,7 +67,7 @@ const Home = () => {
     //e.preventDefault();
     // auth.setIsAuthenticated(true);
     console.log(API_URL);
-    if(producto.nombre == '' || producto.descripcion == ''){
+    if(producto.nombre == '' || producto.cantidad == ''){
       alert('debe llenar todos los campos')
       return 
     } else {
@@ -82,15 +80,10 @@ const Home = () => {
             formData.append(key, value);
           });
 
-          // Agregar la imagen al FormData solo si img no es nulo
-          if (img !== null) {
-            formData.append("file", img, img.name);
-          }
-
           const response = await fetch(`${API_URL}/productos/${producto.id}`, {
             method: "POST",
-            //headers: { "Content-Type": "application/json" },
-            //body: JSON.stringify(bodySend)
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodySend)
             body: formData
           });
           if (response.ok) {
@@ -107,12 +100,7 @@ const Home = () => {
           Object.entries(producto).forEach(([key, value]) => {
             formData.append(key, value);
           });
-
-          // Agregar la imagen al FormData solo si img no es nulo
-          if (img !== null) {
-            formData.append("file", img, img.name);
-          }
-
+        
           const response = await fetch(`${API_URL}/productos`, {
             method: "POST",
             //headers: { "Content-Type": "application/json" },
@@ -147,9 +135,8 @@ const Home = () => {
           setProducto({
             id: dataResponse._id,
             nombre: dataResponse.nombre,
-            imagen: dataResponse.imagen,
-            descripcion: dataResponse.descripcion,
-            precio: dataResponse.precio,
+            cantidad: dataResponse.cantidad,
+            fecha_vencimiento: dataResponse.fecha_vencimiento,
           })
         }
       } else {
@@ -179,29 +166,13 @@ const Home = () => {
     }
   }
 
-    
-  const onChangeImage: ChangeEventHandler<HTMLInputElement> = (e) => {
-      // Verifica si hay archivos seleccionados
-      if (!e.target.files || e.target.files.length === 0) {
-        return;
-      }
-      
-      let files = e.target.files;
-      let name = files[0]?.name ?? "";
-
-      setProducto((prev) => ({
-        ...prev,
-        imagen: name,
-      }));
-      setImg(files[0]);
-    };
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12} md={12}>
 
         <Card>
-          <CardHeader title='Nuevo Producto' titleTypographyProps={{ variant: 'h1' }} />
+          <CardHeader title='Agregar Producto' titleTypographyProps={{ variant: 'h1' }} />
             <CardContent>
 
             <Grid container spacing={6}>
@@ -220,36 +191,24 @@ const Home = () => {
               <Grid item xs={12} md={12}>
                 <TextField
                   fullWidth
-                  label='Descripción'
-                  placeholder='describe tu producto'
+                  label='Cantidad'
+                  placeholder='Cantidad de producto'
                   multiline
                   rows={2}
-                  value={producto.descripcion}
-                  name='descripcion'
+                  value={producto.cantidad}
+                  name='cantidad'
                   onChange={handleChange}
                 />
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-              <FormControl fullWidth>
-                <InputLabel>Imagen</InputLabel>
-                <Input
-                  type="file"
-                  name="imagen"
-                  onChange={onChangeImage}
-                  inputProps={{ accept: 'image/*' }} // Puedes limitar la selección a archivos de imagen
-                />
-              </FormControl>
               </Grid>
               
               <Grid item xs={12} md={2}>
                 <TextField
                   fullWidth
                   type='text'
-                  label='Precio'
-                  placeholder='Indica el precio'
-                  value={producto.precio}
-                  name='precio'
+                  label='Fecha de vencimiento'
+                  placeholder='Indica la Fecha de vencimiento'
+                  value={producto.fecha_vencimiento}
+                  name='fecha_vencimiento'
                   onChange={handleChange}
                 />
               </Grid>
