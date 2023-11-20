@@ -13,78 +13,82 @@ import TextField from '@mui/material/TextField'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import DatePicker from 'react-datepicker'
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
 import { Box, IconButton, Input, InputAdornment } from '@mui/material'
 
-import { IProducto } from 'src/interfaces'
+import { IInventario } from 'src/interfaces'
 import { API_URL } from 'src/configs/constans'
 import { AuthResponse, AuthResponseError } from 'src/configs/types'
 
 const Home = () => {
-
-  const auth = useAuth();
-  const [producto, setProducto] = useState<IProducto>({
-    id: '',
-    nombre: '',
-    cantidad: 0,
-    fecha_vencimiento: '',
-
-  })
+    const auth = useAuth();
+    const [inventario, setInventario] = useState<IInventario>({
+        id: '',
+        nombre: '',
+        cantidad: 0,
+        fecha_vencimiento: new Date("2023-12-01"),
+      });
 
   const [oportunidades, setOportunidades] = useState([])
   const [errorResponse, setErrorResponse] = useState("")
   const [date, setDate] = useState<Date | null | undefined>(null)
   const CustomInput = forwardRef((props, ref) => {
-    return <TextField fullWidth {...props} inputRef={ref} label='Birth Date' autoComplete='off' />
+    return <TextField fullWidth {...props} inputRef={ref} label='Fecha de Vencimiento' autoComplete='off' />
   })
 
   useEffect(() => {
     getCompanyData();
   }, [])
 
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-    setProducto({
-      ...producto,
-      [name]: value
-    })
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setInventario({
+      ...inventario,
+      [name]: value,
+    });
+  };
 
+  const handleDateChange = (date: Date | null | undefined) => {
+    setInventario({
+      ...inventario,
+      fecha_vencimiento: date || undefined,
+    });
+  };
 
-  const handleChangeSelect = (e:) => {
-    const {name, value} = e.target;
-    setProducto({
-      ...producto,
-      [name]: value
-    })
-  }
+  const handleChangeSelect = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    const { name, value } = e.target;
+    setInventario({
+      ...inventario,
+      [name || '']: value,
+    });
+  };
 
 
   async function handleSubmit() {
-    //e.preventDefault();
-    // auth.setIsAuthenticated(true);
     console.log(API_URL);
-    if(producto.nombre == '' || producto.cantidad == ''){
-      alert('debe llenar todos los campos')
-      return 
+    
+    if (!inventario.nombre || (!inventario.cantidad && inventario.cantidad !== 0)) {
+      alert('Debe llenar todos los campos');
+      return; 
     } else {
       try {
-        if(producto.id != '' && producto.id != null) { //update producto
+        if(inventario.id != '' && inventario.id != null) { //update inventario
           const formData = new FormData();
           
           // Agregar cada campo del formulario al FormData
-          Object.entries(producto).forEach(([key, value]) => {
+          Object.entries(inventario).forEach(([key, value]) => {
             formData.append(key, value);
           });
 
-          const response = await fetch(`${API_URL}/productos/${producto.id}`, {
+          const response = await fetch(`${API_URL}/inventarios/${inventario.id}`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bodySend)
-            body: formData
+            //headers: { "Content-Type": "application/json" },
+            //body: JSON.stringify(bodySend), // Agrega una coma aquí
+            // body: formData // Puedes quitar esta línea si estás usando formData solo
           });
           if (response.ok) {
             const json = (await response.json()) as AuthResponse;
@@ -93,15 +97,15 @@ const Home = () => {
             const json = (await response.json()) as AuthResponseError;
             setErrorResponse(json.body.error);
           }
-        } else { //create producto
+        } else { //create inventario
           const formData = new FormData();
           
           // Agregar cada campo del formulario al FormData
-          Object.entries(producto).forEach(([key, value]) => {
+          Object.entries(inventario).forEach(([key, value]) => {
             formData.append(key, value);
           });
         
-          const response = await fetch(`${API_URL}/productos`, {
+          const response = await fetch(`${API_URL}/inventarios`, {
             method: "POST",
             //headers: { "Content-Type": "application/json" },
             //body: JSON.stringify(bodySend)
@@ -123,7 +127,7 @@ const Home = () => {
 
   const getCompanyData = async () =>{
     try {
-      const response = await fetch(`${API_URL}/productos?user=${auth.getUser()?.id}`, {
+      const response = await fetch(`${API_URL}/inventarios?user=${auth.getUser()?.id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -132,7 +136,7 @@ const Home = () => {
         console.log(json);
         if(json && json.length > 0){
           const dataResponse = json[0];
-          setProducto({
+          setInventario({
             id: dataResponse._id,
             nombre: dataResponse.nombre,
             cantidad: dataResponse.cantidad,
@@ -150,7 +154,7 @@ const Home = () => {
 
   const searchOpornunities = async () =>{
     try {
-      const response = await fetch(`${API_URL}/productos/consultarLicitaciones/${auth.getUser()?.id}`, {
+      const response = await fetch(`${API_URL}/inventarios/consultarLicitaciones/${auth.getUser()?.id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -182,36 +186,34 @@ const Home = () => {
                   type='text'
                   label='Nombre'
                   placeholder='nombre del producto'
-                  value={producto.nombre}
+                  value={inventario.id}
                   name='nombre'
                   onChange={handleChange}
                 />
               </Grid>
 
-              <Grid item xs={12} md={12}>
+              <Grid item xs={12} md={2}>
                 <TextField
                   fullWidth
                   label='Cantidad'
                   placeholder='Cantidad de producto'
                   multiline
                   rows={2}
-                  value={producto.cantidad}
+                  value={inventario.cantidad}
                   name='cantidad'
                   onChange={handleChange}
                 />
               </Grid>
               
               <Grid item xs={12} md={2}>
-                <TextField
-                  fullWidth
-                  type='text'
-                  label='Fecha de vencimiento'
-                  placeholder='Indica la Fecha de vencimiento'
-                  value={producto.fecha_vencimiento}
-                  name='fecha_vencimiento'
-                  onChange={handleChange}
+                <InputLabel htmlFor="fecha-vencimiento">Fecha de Vencimiento</InputLabel>
+                <DatePicker
+                    id="fecha-vencimiento"
+                    selected={inventario.fecha_vencimiento}
+                    onChange={(date) => handleDateChange(date)}
+                    dateFormat="yyyy-MM-dd"
                 />
-              </Grid>
+                </Grid>
 
             </Grid>
 
@@ -234,8 +236,8 @@ const Home = () => {
         </Card>
 
       </Grid>
-    </Grid>
-  )
-}
+      </Grid>
+  );
+};
 
-export default Home
+export default Home;
