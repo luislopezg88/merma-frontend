@@ -167,7 +167,7 @@ const RegisterPage = () => {
             <Typography variant='body2'>Haz que la gestión de tus aplicaciones sea fácil y divertida!</Typography>
           </Box>
           <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-            <TextField autoFocus fullWidth id='username' label='Nombre de usurio' sx={{ marginBottom: 4 }} />
+            <TextField autoFocus fullWidth id='username' label='Nombre de usuario' sx={{ marginBottom: 4 }} />
             <TextField fullWidth type='email' label='Correo electrónico' sx={{ marginBottom: 4 }} />
             <FormControl fullWidth>
               <InputLabel htmlFor='auth-register-password'>Contraseña</InputLabel>

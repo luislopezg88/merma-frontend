@@ -36,13 +36,19 @@ import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 import { API_URL } from 'src/configs/constans'
 import { AuthResponse, AuthResponseError } from 'src/configs/types'
 import { useAuth } from 'src/context/AuthProvider'
+import { MenuItem, Select } from '@mui/material'
 
 
 interface State {
-  username: string;
+  nombre: string;
   email: string;
   password: string
   showPassword: boolean
+  telefono: string
+  direccion: string
+  tipo: string
+  descripcion: string
+  ubicacion: string
 }
 
 // ** Styled Components
@@ -69,10 +75,15 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
 const RegisterPage = () => {
   // ** States
   const [values, setValues] = useState<State>({
-    username: '',
+    nombre: '',
     email: '',
     password: '',
-    showPassword: false
+    showPassword: false,
+    telefono: '',
+    direccion: '',
+    tipo: '',
+    descripcion: '',
+    ubicacion: '',
   })
   const [errorResponse, setErrorResponse] = useState("");
 
@@ -86,7 +97,7 @@ const RegisterPage = () => {
     console.log('llego, handleSubmit')
     e.preventDefault();
 
-    if(values.username == '' || values.email == '' || values.password == ''){
+    if(values.nombre == '' || values.email == '' || values.password == ''){
       alert("faltan datos")
       return
     } else {
@@ -94,16 +105,21 @@ const RegisterPage = () => {
         const response = await fetch(`${API_URL}/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: values.email, username: values.username, password: values.password })
+          body: JSON.stringify({ nombre: values.nombre, email: values.email,  password: values.password, tipo: values.tipo, telefono: values.telefono, direccion: values.direccion,  descripcion: values.descripcion, ubicacion: values.ubicacion})
         });
         if (response.ok) {
           const json = (await response.json()) as AuthResponse;
           console.log(json);
           setValues({
             email: '',
-            username: '',
+            nombre: '',
             password: '',
-            showPassword: false
+            showPassword: false,
+            telefono: '',
+            direccion: '',
+            tipo: '',
+            descripcion: '',
+            ubicacion: ''
           })
           router.push("/");
         } else {
@@ -216,9 +232,8 @@ const RegisterPage = () => {
             <Typography variant='body2'>Haz que la gestión de tus aplicaciones sea fácil y divertida!</Typography>
           </Box>
           <form noValidate autoComplete='off' onSubmit={handleSubmit}>
-            <TextField autoFocus fullWidth id='username' label='Nombre de usurio' sx={{ marginBottom: 4 }} value={values.username} onChange={handleChange('username')} name='username' />
             <TextField fullWidth type='email' label='Correo electrónico' sx={{ marginBottom: 4 }} value={values.email} onChange={handleChange('email')} name='email' />
-            <FormControl fullWidth>
+            <FormControl fullWidth sx={{ marginBottom: 4 }}>
               <InputLabel htmlFor='auth-register-password'>Contraseña</InputLabel>
               <OutlinedInput
                 label='Password'
@@ -241,6 +256,18 @@ const RegisterPage = () => {
                 }
               />
             </FormControl>
+            <TextField autoFocus fullWidth id='nombre' label='Nombre' sx={{ marginBottom: 4 }} value={values.nombre} onChange={handleChange('nombre')} name='nombre' />
+            <FormControl fullWidth sx={{ marginBottom: 4 }}>
+              <InputLabel>Role</InputLabel>
+              <Select label='Role' defaultValue='cliente'>
+                <MenuItem value='cliente'>Cliente</MenuItem>
+                <MenuItem value='mayorista'>Mayorista</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField fullWidth type='text' label='Teléfono' sx={{ marginBottom: 4 }} value={values.telefono} onChange={handleChange('telefono')} name='telefono' />
+            <TextField fullWidth type='text' label='Dirección' sx={{ marginBottom: 4 }} value={values.direccion} onChange={handleChange('direccion')} name='direccion' />
+            <TextField fullWidth type='text' label='Descripción' sx={{ marginBottom: 4 }} value={values.descripcion} onChange={handleChange('descripcion')} name='descripcion' />
+            <TextField fullWidth type='text' label='Ubicación' sx={{ marginBottom: 4 }} value={values.ubicacion} onChange={handleChange('ubicacion')} name='ubicacion' />
             <FormControlLabel
               control={<Checkbox />}
               label={
