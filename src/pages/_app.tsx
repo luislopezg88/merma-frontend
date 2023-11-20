@@ -82,9 +82,9 @@ const App = (props: ExtendedAppProps) => {
                 {noAuthRequired.includes(router.pathname) ? (
                   <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
                 ) : (
-                  <ProtectedRoute>
+                  //<ProtectedRoute>
                     <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
-                  </ProtectedRoute>
+                  //</ProtectedRoute>
                 )}
               </AuthProvider>
             )
