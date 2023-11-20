@@ -13,8 +13,11 @@ import TextField from '@mui/material/TextField'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+// import DatePicker from 'react-datepicker';
+// import 'react-datepicker/dist/react-datepicker.css';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
@@ -30,7 +33,7 @@ const Home = () => {
         id: '',
         nombre: '',
         cantidad: 0,
-        fecha_vencimiento: new Date("2023-12-01"),
+        fecha_vencimiento: null,
       });
 
   const [oportunidades, setOportunidades] = useState([])
@@ -52,13 +55,6 @@ const Home = () => {
     });
   };
 
-  const handleDateChange = (date: Date | null | undefined) => {
-    setInventario({
-      ...inventario,
-      fecha_vencimiento: date || undefined,
-    });
-  };
-
   const handleChangeSelect = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const { name, value } = e.target;
     setInventario({
@@ -70,15 +66,15 @@ const Home = () => {
 
   async function handleSubmit() {
     console.log(API_URL);
-    
+
     if (!inventario.nombre || (!inventario.cantidad && inventario.cantidad !== 0)) {
       alert('Debe llenar todos los campos');
-      return; 
+      return;
     } else {
       try {
         if(inventario.id != '' && inventario.id != null) { //update inventario
           const formData = new FormData();
-          
+
           // Agregar cada campo del formulario al FormData
           Object.entries(inventario).forEach(([key, value]) => {
             formData.append(key, value);
@@ -99,12 +95,12 @@ const Home = () => {
           }
         } else { //create inventario
           const formData = new FormData();
-          
+
           // Agregar cada campo del formulario al FormData
           Object.entries(inventario).forEach(([key, value]) => {
             formData.append(key, value);
           });
-        
+
           const response = await fetch(`${API_URL}/inventarios`, {
             method: "POST",
             //headers: { "Content-Type": "application/json" },
@@ -150,7 +146,7 @@ const Home = () => {
     } catch (error) {
       console.log(error);
     }
-  }  
+  }
 
   const searchOpornunities = async () =>{
     try {
@@ -192,32 +188,47 @@ const Home = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={2}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
+                  type='text'
                   label='Cantidad'
-                  placeholder='Cantidad de producto'
-                  multiline
-                  rows={2}
+                  placeholder=''
                   value={inventario.cantidad}
                   name='cantidad'
                   onChange={handleChange}
                 />
               </Grid>
-              
-              <Grid item xs={12} md={2}>
-                <InputLabel htmlFor="fecha-vencimiento">Fecha de Vencimiento</InputLabel>
-                <DatePicker
+
+              <Grid item xs={12} md={6}>
+                {/* <DatePicker
                     id="fecha-vencimiento"
                     selected={inventario.fecha_vencimiento}
                     onChange={(date) => handleDateChange(date)}
                     dateFormat="yyyy-MM-dd"
-                />
+                /> */}
+
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                      sx={{
+                        width: '100%'
+                      }}
+                      label={'Fecha de Vencimiento'}
+                      value={inventario.fecha_vencimiento}
+                      onChange={(newValue) => {
+                        setInventario({
+                          ...inventario,
+                          fecha_vencimiento: newValue
+                        })
+                      }}
+                    />
+                  </LocalizationProvider>
+
                 </Grid>
 
             </Grid>
 
-            
+
             <Grid container spacing={6}>
               <Grid item xs={12} sm={12}>
                 <Box
@@ -228,10 +239,10 @@ const Home = () => {
                   <Button size='large' type='button' variant='contained' onClick={() => handleSubmit()} >
                     Guardar
                   </Button>
-                </Box> 
+                </Box>
               </Grid>
             </Grid>
-            
+
           </CardContent>
         </Card>
 

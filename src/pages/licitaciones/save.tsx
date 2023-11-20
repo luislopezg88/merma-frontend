@@ -47,7 +47,7 @@ const Save = () => {
     console.log(API_URL);
     if(licitacion.nombre == '' || licitacion.descripcion == ''){
       alert('debe llenar todos los campos')
-      return 
+      return
     } else {
       try {
         const bodySend = {
@@ -72,7 +72,7 @@ const Save = () => {
     }
   }
 
-  return ( 
+  return (
     <Grid container spacing={6}>
       <Grid item xs={12} md={12}>
         <Card>
@@ -104,7 +104,7 @@ const Save = () => {
 
                 <Grid item xs={12} sm={4}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker 
+                    <DatePicker
                       sx={{
                         width: '100%'
                       }}
@@ -123,7 +123,7 @@ const Save = () => {
                     <DatePicker
                       sx={{
                         width: '100%'
-                      }} 
+                      }}
                       label={'Fecha de culminación'}
                       value={licitacion.fin} onChange={(newValue) => {
                         setLicitacion({
@@ -149,14 +149,14 @@ const Save = () => {
                     <Button size='large' type='button' variant='contained' onClick={() => saveData()} >
                       Guardar
                     </Button>
-                  </Box> 
+                  </Box>
                 </Grid>
               </Grid>
           </CardContent>
         </Card>
       </Grid>
-    </Grid> 
+    </Grid>
   );
 }
- 
+
 export default Save;

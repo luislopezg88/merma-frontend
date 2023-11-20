@@ -11,7 +11,7 @@ export interface IProducto {
 export interface IInventario {
     id?: string;
     nombre?: string;
-    fecha_vencimiento?: Date | undefined;
+    fecha_vencimiento?: Dayjs | null;
     cantidad?: number;
 }
 
