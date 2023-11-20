@@ -1,17 +1,11 @@
 import { Dayjs } from 'dayjs'
 
-export interface IEmpresa {
+export interface IProducto {
     id?: string;
     nombre?: string;
     descripcion?: string;
-    tipo?: string;
-    empleados: string;
-    finalidad?: string;
-    instrumento?: string;
-    administracion?: string;
-    organo?: string;
-    tags: Array<string>;
-    id_user?: string;
+    imagen?: string;
+    precio?: number;
 }
 
 export interface ILicitacion {
