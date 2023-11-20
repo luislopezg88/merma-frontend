@@ -46,7 +46,7 @@ interface State {
   showPassword: boolean
   telefono: string
   direccion: string
-  tipo: string
+  rol: string
   descripcion: string
   ubicacion: string
 }
@@ -81,11 +81,12 @@ const RegisterPage = () => {
     showPassword: false,
     telefono: '',
     direccion: '',
-    tipo: '',
+    rol: '',
     descripcion: '',
     ubicacion: '',
   })
   const [errorResponse, setErrorResponse] = useState("");
+  const [rol, setRol] = useState<string>("");
 
   // ** Hook
   const theme = useTheme()
@@ -94,7 +95,8 @@ const RegisterPage = () => {
 
   
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
-    console.log('llego, handleSubmit')
+    console.log('llego, handleSubmit');
+   // console.log('Rol: '+rol);
     e.preventDefault();
 
     if(values.nombre == '' || values.email == '' || values.password == ''){
@@ -105,7 +107,7 @@ const RegisterPage = () => {
         const response = await fetch(`${API_URL}/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nombre: values.nombre, email: values.email,  password: values.password, tipo: values.tipo, telefono: values.telefono, direccion: values.direccion,  descripcion: values.descripcion, ubicacion: values.ubicacion})
+          body: JSON.stringify({ nombre: values.nombre, email: values.email,  password: values.password, rol: rol, telefono: values.telefono, direccion: values.direccion,  descripcion: values.descripcion, ubicacion: values.ubicacion})
         });
         if (response.ok) {
           const json = (await response.json()) as AuthResponse;
@@ -117,7 +119,7 @@ const RegisterPage = () => {
             showPassword: false,
             telefono: '',
             direccion: '',
-            tipo: '',
+            rol: '',
             descripcion: '',
             ubicacion: ''
           })
@@ -259,28 +261,23 @@ const RegisterPage = () => {
             <TextField autoFocus fullWidth id='nombre' label='Nombre' sx={{ marginBottom: 4 }} value={values.nombre} onChange={handleChange('nombre')} name='nombre' />
             <FormControl fullWidth sx={{ marginBottom: 4 }}>
               <InputLabel>Role</InputLabel>
-              <Select label='Role' defaultValue='cliente'>
-                <MenuItem value='cliente'>Cliente</MenuItem>
-                <MenuItem value='mayorista'>Mayorista</MenuItem>
-              </Select>
+              <Select label='Rol' defaultValue='cliente' value={rol} onChange={(e) => setRol(e.target.value)} >
+                   <MenuItem value='cliente'>Cliente</MenuItem>
+                    <MenuItem value='mayorista'>Mayorista</MenuItem>
+            </Select>
             </FormControl>
-            <TextField fullWidth type='text' label='Teléfono' sx={{ marginBottom: 4 }} value={values.telefono} onChange={handleChange('telefono')} name='telefono' />
-            <TextField fullWidth type='text' label='Dirección' sx={{ marginBottom: 4 }} value={values.direccion} onChange={handleChange('direccion')} name='direccion' />
+            {rol==="cliente" ?
+              <>
+                <TextField fullWidth type='text' label='Teléfono' sx={{ marginBottom: 4 }} value={values.telefono} onChange={handleChange('telefono')} name='telefono' />
+                <TextField fullWidth type='text' label='Dirección' sx={{ marginBottom: 4 }} value={values.direccion} onChange={handleChange('direccion')} name='direccion' />
+              </>
+            :null}
+            {rol==="mayorista"?
+            <>
             <TextField fullWidth type='text' label='Descripción' sx={{ marginBottom: 4 }} value={values.descripcion} onChange={handleChange('descripcion')} name='descripcion' />
             <TextField fullWidth type='text' label='Ubicación' sx={{ marginBottom: 4 }} value={values.ubicacion} onChange={handleChange('ubicacion')} name='ubicacion' />
-            <FormControlLabel
-              control={<Checkbox />}
-              label={
-                <Fragment>
-                  <span>Estoy de acuerdo con {' '}</span>
-                  <Link href='/' passHref>
-                    <LinkStyled onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}>
-                      términos y políticas de privacidad
-                    </LinkStyled>
-                  </Link>
-                </Fragment>
-              }
-            />
+            </>
+            :null}
             <Button fullWidth size='large' type='submit' variant='contained' sx={{ marginBottom: 7 }}>
               Registrarse
             </Button>
