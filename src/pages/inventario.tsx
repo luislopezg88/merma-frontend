@@ -191,7 +191,7 @@ const Home = () => {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  type='text'
+                  type='number'
                   label='Cantidad'
                   placeholder=''
                   value={inventario.cantidad}
