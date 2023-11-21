@@ -131,9 +131,10 @@ const UserDropdown = () => {
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
           <Box sx={styles}>
             <AccountOutline sx={{ marginRight: 2 }} />
-            Profile
+            Cuenta
           </Box>
         </MenuItem>
+        {/*
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
           <Box sx={styles}>
             <EmailOutline sx={{ marginRight: 2 }} />
@@ -165,6 +166,7 @@ const UserDropdown = () => {
             FAQ
           </Box>
         </MenuItem>
+        */}
         <Divider />
         <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose()}>
           <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
