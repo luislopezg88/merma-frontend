@@ -7,7 +7,6 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import Grid, { GridProps } from '@mui/material/Grid'
 
-
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import InputLabel from '@mui/material/InputLabel'
@@ -21,9 +20,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
-import { Box, IconButton, Input, InputAdornment } from '@mui/material'
+import { Autocomplete, AutocompleteChangeDetails, Box, IconButton, Input, InputAdornment } from '@mui/material'
 
 import { IInventario } from 'src/interfaces'
+import { IProducto } from 'src/interfaces'
 import { API_URL } from 'src/configs/constans'
 import { AuthResponse, AuthResponseError } from 'src/configs/types'
 
@@ -31,7 +31,7 @@ const Home = () => {
     const auth = useAuth();
     const [inventario, setInventario] = useState<IInventario>({
         id: '',
-        nombre: '',
+        id_producto: '',
         cantidad: 0,
         fecha_vencimiento: null,
       });
@@ -42,10 +42,39 @@ const Home = () => {
   const CustomInput = forwardRef((props, ref) => {
     return <TextField fullWidth {...props} inputRef={ref} label='Fecha de Vencimiento' autoComplete='off' />
   })
+  const [productos, setProductos] = useState<IProducto[]>([]);
 
   useEffect(() => {
-    getCompanyData();
+    getProductosData();
   }, [])
+
+  const getProductosData = async () => {
+    try {
+      const response = await fetch(`${API_URL}/productos/selectProductos`);
+      const result = await response.json();
+
+      if (result.statuscode === 200) {
+        const { data } = result.body;
+        setProductos(data);
+      } else {
+        console.error('Error en la respuesta del servidor:', result);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleChangeAutocomplete = (
+    event: React.SyntheticEvent,
+    value: IProducto | null,
+    reason: string,
+    details?: AutocompleteChangeDetails<any> | undefined
+  ) => {
+    setInventario({
+      ...inventario,
+      id_producto: value?.id || null, // Ajusta esto según la propiedad del objeto que desees almacenar
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,11 +92,10 @@ const Home = () => {
     });
   };
 
-
   async function handleSubmit() {
-    console.log(API_URL);
+    console.log('API_URL: '+API_URL);
 
-    if (!inventario.nombre || (!inventario.cantidad && inventario.cantidad !== 0)) {
+    if (!inventario.id_producto || (!inventario.cantidad && inventario.cantidad !== 0)) {
       alert('Debe llenar todos los campos');
       return;
     } else {
@@ -80,11 +108,17 @@ const Home = () => {
             formData.append(key, value);
           });
 
-          const response = await fetch(`${API_URL}/inventarios/${inventario.id}`, {
+          const bodySend = {
+            ...inventario,
+            id_mayorista: "655c0129afd04e2f8a239a89" //auth.getUser()?.id
+          }
+
+          const response = await fetch(`${API_URL}/productos/inventario`, {
             method: "POST",
-            //headers: { "Content-Type": "application/json" },
-            //body: JSON.stringify(bodySend), // Agrega una coma aquí
-            // body: formData // Puedes quitar esta línea si estás usando formData solo
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodySend), // Agrega una coma aquí
+            //headers: { "Content-Type": "multipart/form-data" },
+            //body: formData // Puedes quitar esta línea si estás usando formData solo
           });
           if (response.ok) {
             const json = (await response.json()) as AuthResponse;
@@ -101,11 +135,17 @@ const Home = () => {
             formData.append(key, value);
           });
 
-          const response = await fetch(`${API_URL}/inventarios`, {
+          const bodySend = {
+            ...inventario,
+            id_mayorista: "655c0129afd04e2f8a239a89" //auth.getUser()?.id
+          }
+
+          const response = await fetch(`${API_URL}/productos/inventario`, {
             method: "POST",
-            //headers: { "Content-Type": "application/json" },
-            //body: JSON.stringify(bodySend)
-            body: formData
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodySend), // Agrega una coma aquí
+            //headers: { "Content-Type": "multipart/form-data" },
+            //body: formData // Puedes quitar esta línea si estás usando formData solo
           });
           if (response.ok) {
             const json = (await response.json()) as AuthResponse;
@@ -121,52 +161,6 @@ const Home = () => {
     }
   }
 
-  const getCompanyData = async () =>{
-    try {
-      const response = await fetch(`${API_URL}/inventarios?user=${auth.getUser()?.id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = (await response.json()) as any;
-        console.log(json);
-        if(json && json.length > 0){
-          const dataResponse = json[0];
-          setInventario({
-            id: dataResponse._id,
-            nombre: dataResponse.nombre,
-            cantidad: dataResponse.cantidad,
-            fecha_vencimiento: dataResponse.fecha_vencimiento,
-          })
-        }
-      } else {
-        const json = (await response.json()) as AuthResponseError;
-        setErrorResponse(json.body.error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const searchOpornunities = async () =>{
-    try {
-      const response = await fetch(`${API_URL}/inventarios/consultarLicitaciones/${auth.getUser()?.id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = (await response.json()) as any;
-        console.log(json);
-      } else {
-        const json = (await response.json()) as AuthResponseError;
-        setErrorResponse(json.body.error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-
   return (
     <Grid container spacing={6}>
       <Grid item xs={12} md={12}>
@@ -177,14 +171,13 @@ const Home = () => {
 
             <Grid container spacing={6}>
               <Grid item xs={12} md={12}>
-                <TextField
-                  fullWidth
-                  type='text'
-                  label='Nombre'
-                  placeholder='nombre del producto'
-                  value={inventario.id}
-                  name='nombre'
-                  onChange={handleChange}
+                <Autocomplete
+                  options={productos}
+                  getOptionLabel={(option) => option.nombre || ''}
+                  onChange={handleChangeAutocomplete}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Seleccione un producto" variant="outlined" />
+                  )}
                 />
               </Grid>
 
