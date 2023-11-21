@@ -13,6 +13,7 @@ import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
 import { Box, Menu, Radio } from '@mui/material';
 
+
 const CardBasic = () => {
     const [productos, setProductos] = useState<IProducto[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<IProducto | null>(null);
@@ -67,6 +68,7 @@ const CardBasic = () => {
             const productoConMayorista = {
                 ...selectedProduct,
                 mayoristas: mayorista ? [mayorista] : [],
+                cantidad: 1, // Cantidad predeterminada
             };
             setCarrito(prevCarrito => [...prevCarrito, productoConMayorista]);
             // Limpiar la selección actual después de agregar al carrito
@@ -79,6 +81,28 @@ const CardBasic = () => {
         // Muestra la sección del carrito, por ejemplo, a través de un modal, un componente emergente, etc.
         console.log("Productos en el carrito:", carrito);
         setAnchorEl(event.currentTarget)
+    };
+
+    const handleIncrementarCantidad = (productoId: string) => {
+        setCarrito(prevCarrito =>
+            prevCarrito.map(producto =>
+                producto.id === productoId.toString() ? { ...producto, cantidad: producto.cantidad + 1 } : producto
+            )
+        );
+    };
+    
+    const handleDecrementarCantidad = (productoId: string) => {
+        setCarrito(prevCarrito =>
+            prevCarrito.map(producto =>
+                producto.id === productoId.toString() && producto.cantidad > 1 ? { ...producto, cantidad: producto.cantidad - 1 } : producto
+            )
+        );
+    };
+    
+    const handleEliminarProducto = (productoId: string) => {
+        setCarrito(prevCarrito =>
+            prevCarrito.filter(producto => producto.id !== productoId.toString())
+        );
     };
 
     const handleDropdownClose = (url?: string) => {
@@ -180,19 +204,23 @@ const CardBasic = () => {
                                 {productoCarrito.nombre} ({productoCarrito.mayoristas && productoCarrito.mayoristas.length > 0 ? productoCarrito.mayoristas[0].nombre_mayorista : 'Sin mayorista'})
                             </Typography>
                         </Box>
-                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
-                        <Typography variant='body2' sx={{padding: 0 }}>
-                            {productoCarrito.precio}
-                        </Typography>
-                    </Box>
-                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
-                        <Typography variant='body2' sx={{padding: 0 }}>
-                            ${productoCarrito.precio}
-                        </Typography>
-                    </Box>
-                </Card>
-                </Grid>
-            ))}
+            <Box component='span' sx={{ width: '50%', float: 'right', textAlign: 'right' }}>
+                <IconButton onClick={() => handleDecrementarCantidad(productoCarrito.id)} disabled={productoCarrito.cantidad === 1}>
+                    <RemoveIcon />
+                </IconButton>
+                <Typography component='span' sx={{ margin: '0 0.5rem' }}>
+                    {productoCarrito.cantidad}
+                </Typography>
+                <IconButton onClick={() => handleIncrementarCantidad(productoCarrito.id)}>
+                    <AddIcon />
+                </IconButton>
+                <IconButton onClick={() => handleEliminarProducto(productoCarrito.id)}>
+                    <DeleteIcon />
+                </IconButton>
+            </Box>
+        </Card>
+    </Grid>
+))}
             </Menu>
         </Grid>
     )
