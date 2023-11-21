@@ -103,9 +103,9 @@ const LoginPage = () => {
           const json = (await response.json()) as AuthResponse;
           console.log(json);
   
-          if (json.body.accessToken && json.body.refreshToken) {
+          //if (json.body.accessToken && json.body.refreshToken) {
             auth.saveUser(json);
-          }
+          //}
         } else {
           const json = (await response.json()) as AuthResponseError;
           setErrorResponse(json.body.error);
@@ -117,9 +117,24 @@ const LoginPage = () => {
   }
   
   if (auth.isAuthenticated) {
+    const user = auth.getUser()!;
+
+    if (user !== undefined) {
+      const rol = user.rol;
+      //console.log(rol); // Imprime el valor de la propiedad 'rol' si 'user' no es 'undefined'
+      if(rol == 'mayorista'){
+        return router.push('/dashboard')
+      }else{
+        return router.push('/tienda')
+      }
+    } else {
+      console.log("No se encontró ningún usuario autenticado.");
+    }
+    /*
     setTimeout(()=>{
       return router.push('/')
     },10)
+    */
   }
 
   return (

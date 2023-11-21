@@ -15,7 +15,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  tipo: string;
+  rol: string;
 }
 
 export interface AccessTokenResponse {

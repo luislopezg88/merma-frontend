@@ -18,27 +18,19 @@ import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
 import { Box } from '@mui/material'
 
-import { IEmpresa } from 'src/interfaces'
-import { finalidades } from 'src/moks/finalidades'
-import { instrumentos } from 'src/moks/instrumentos'
-import { administraciones } from 'src/moks/administraciones'
-import { organos } from 'src/moks/organos'
+import { IMayorista } from 'src/interfaces'
 import { API_URL } from 'src/configs/constans'
 import { AuthResponse, AuthResponseError } from 'src/configs/types'
 
 const Home = () => {
 
   const auth = useAuth();
-  const [empresa, setempresa] = useState<IEmpresa>({
+  const [empresa, setempresa] = useState<IMayorista>({
     id: '',
     nombre: '',
     descripcion: '',
-    finalidad: '',
-    tipo: '',
-    empleados: '',
-    instrumento: '',
-    tags: [],
-    id_user: ''
+    telefono: '',
+    ubicacion: ''
   })
   const [tag, setTag] = useState<string>('')
   const [oportunidades, setOportunidades] = useState([])
