@@ -40,8 +40,8 @@ const CardBasic = () => {
     };
 
     const handleProductChange = (producto: IProducto, mayorista: IMayorista) => {
-        console.log('Producto seleccionado:', producto);
-        console.log('Mayorista seleccionado:', mayorista);
+        //console.log('Producto seleccionado:', producto);
+        //console.log('Mayorista seleccionado:', mayorista);
     
         // Actualiza el estado con el producto y mayorista seleccionados
         setSelectedProduct({
@@ -73,11 +73,11 @@ const CardBasic = () => {
     return (
         <Grid container spacing={6}>
             <Grid item xs={12} sx={{ paddingBottom: 4 }}>
-                <Typography variant='h5'>Productos</Typography>
+                <Typography variant='h5' sx={{ float: "left" }}>Productos</Typography>
                 <Button
                     variant='contained'
-                    sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0, mt: 2 }}
                     onClick={handleVerCarrito}
+                    sx={{ float: "right" }}
                 >
                     Ver Carrito
                 </Button>
@@ -124,21 +124,26 @@ const CardBasic = () => {
             ))}
 
             {carrito.map((productoCarrito) => (
-                <CardContent key={productoCarrito.id}>
-                    <Typography variant='h6' sx={{ marginBottom: 2 }}>
+                <Grid
+                    item
+                    xs={8}
+                    md={4}
+                >
+                <Card key={productoCarrito.id} sx={{ padding: '0.5rem !important' }}>
+                    <Typography variant='h6' sx={{ marginBottom: 1 }}>
                         {productoCarrito.nombre}
                     </Typography>
-                    <Typography variant='body2' sx={{ marginBottom: 3.5 }}>
-                        {/* Mostrar otras propiedades del producto si es necesario */}
+                    <Typography variant='body2' sx={{ marginBottom: 0 }}>
                         {productoCarrito.descripcion}
                     </Typography>
-                    <Typography sx={{ fontWeight: 500, marginBottom: 3 }}>
+                    <Typography sx={{ fontWeight: 500, marginBottom: 2 }}>
                         Precio:{' '}
                         <Box component='span' sx={{ fontWeight: 'bold' }}>
                             ${productoCarrito.precio}
                         </Box>
                     </Typography>
-                </CardContent>
+                </Card>
+                </Grid>
             ))}
         </Grid>
     )
