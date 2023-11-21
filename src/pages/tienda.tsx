@@ -1,5 +1,6 @@
 // ** MUI Imports
-import React, { useState, useEffect } from 'react';
+import React, { useState, SyntheticEvent, useEffect } from 'react';
+import { useRouter } from 'next/router'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { IProducto, IMayorista } from 'src/interfaces' // Ajusta según tu interfaz real
@@ -10,13 +11,16 @@ import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
-import { Box, Radio } from '@mui/material';
+import { Box, Menu, Radio } from '@mui/material';
 
 const CardBasic = () => {
     const [productos, setProductos] = useState<IProducto[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<IProducto | null>(null);
     const [selectedMayoristas, setSelectedMayoristas] = useState<{ [key: string]: string | null }>({});
     const [carrito, setCarrito] = useState<IProducto[]>([]);
+    const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+    // ** Hooks
+    const router = useRouter()
 
     useEffect(() => {
         getProducts();
@@ -65,10 +69,18 @@ const CardBasic = () => {
         }
     };    
 
-    const handleVerCarrito = () => {
+    const handleVerCarrito = (event: SyntheticEvent) => {
         // Muestra la sección del carrito, por ejemplo, a través de un modal, un componente emergente, etc.
         console.log("Productos en el carrito:", carrito);
+        setAnchorEl(event.currentTarget)
     };
+
+    const handleDropdownClose = (url?: string) => {
+        if (url) {
+          router.push(url)
+        }
+        setAnchorEl(null)
+    }
 
     return (
         <Grid container spacing={6}>
@@ -123,28 +135,63 @@ const CardBasic = () => {
                 </Grid>
             ))}
 
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={() => handleDropdownClose()}
+                sx={{ '& .MuiMenu-paper': { width: 430, marginTop: 1 } }}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Grid
+                    item
+                    xs={12}
+                    md={12}
+                >
+                <Card sx={{ padding: '0.5rem !important' }}>                    
+                    <Box component='span' sx={{ fontWeight: 500, width: '50%', float: 'left' }}>
+                        <Typography variant='body2' sx={{padding: 0 }} >
+                            Producto
+                        </Typography>
+                    </Box>
+                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
+                        <Typography variant='body2' sx={{padding: 0 }}>
+                            Cantidad
+                        </Typography>
+                    </Box>
+                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
+                        <Typography variant='body2' sx={{padding: 0 }}>
+                            Precio
+                        </Typography>
+                    </Box>
+                </Card>
+                </Grid>
             {carrito.map((productoCarrito) => (
                 <Grid
                     item
-                    xs={8}
-                    md={4}
+                    xs={12}
+                    md={12}
                 >
-                <Card key={productoCarrito.id} sx={{ padding: '0.5rem !important' }}>
-                    <Typography variant='h6' sx={{ marginBottom: 1 }}>
-                        {productoCarrito.nombre}
-                    </Typography>
-                    <Typography variant='body2' sx={{ marginBottom: 0 }}>
-                        {productoCarrito.descripcion}
-                    </Typography>
-                    <Typography sx={{ fontWeight: 500, marginBottom: 2 }}>
-                        Precio:{' '}
-                        <Box component='span' sx={{ fontWeight: 'bold' }}>
+                <Card key={productoCarrito.id} sx={{ padding: '0.5rem !important' }}>                    
+                    <Box component='span' sx={{ fontWeight: 500, width: '50%', float: 'left' }}>
+                        <Typography sx={{ fontWeight: 500, marginBottom: 1, padding: 0 }} >
+                            {productoCarrito.nombre} ({productoCarrito.nombre})
+                        </Typography>
+                    </Box>
+                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
+                        <Typography variant='body2' sx={{padding: 0 }}>
+                            {productoCarrito.precio}
+                        </Typography>
+                    </Box>
+                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
+                        <Typography variant='body2' sx={{padding: 0 }}>
                             ${productoCarrito.precio}
-                        </Box>
-                    </Typography>
+                        </Typography>
+                    </Box>
                 </Card>
                 </Grid>
             ))}
+            </Menu>
         </Grid>
     )
 }
