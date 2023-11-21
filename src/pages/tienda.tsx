@@ -62,10 +62,16 @@ const CardBasic = () => {
 
     const handleAgregarAlCarrito = () => {
         if (selectedProduct) {
-            setCarrito((prevCarrito) => [...prevCarrito, selectedProduct]);
-            // Limpia la selección actual después de agregar al carrito
+            const mayoristaId = selectedMayoristas[selectedProduct.id];
+            const mayorista = selectedProduct.mayoristas?.find(m => m.id_mayorista === mayoristaId);
+            const productoConMayorista = {
+                ...selectedProduct,
+                mayoristas: mayorista ? [mayorista] : [],
+            };
+            setCarrito(prevCarrito => [...prevCarrito, productoConMayorista]);
+            // Limpiar la selección actual después de agregar al carrito
             setSelectedProduct(null);
-            setSelectedMayoristas({}); // Puedes ajustar esto según sea necesario
+            setSelectedMayoristas({});
         }
     };    
 
@@ -166,18 +172,14 @@ const CardBasic = () => {
                     </Box>
                 </Card>
                 </Grid>
-            {carrito.map((productoCarrito) => (
-                <Grid
-                    item
-                    xs={12}
-                    md={12}
-                >
-                <Card key={productoCarrito.id} sx={{ padding: '0.5rem !important' }}>                    
-                    <Box component='span' sx={{ fontWeight: 500, width: '50%', float: 'left' }}>
-                        <Typography sx={{ fontWeight: 500, marginBottom: 1, padding: 0 }} >
-                            {productoCarrito.nombre} ({productoCarrito.nombre})
-                        </Typography>
-                    </Box>
+                {carrito.map(productoCarrito => (
+                <Grid item xs={12} md={12}>
+                    <Card key={productoCarrito.id} sx={{ padding: '0.5rem !important' }}>
+                        <Box component='span' sx={{ fontWeight: 500, width: '50%', float: 'left' }}>
+                            <Typography sx={{ fontWeight: 500, marginBottom: 1, padding: 0 }}>
+                                {productoCarrito.nombre} ({productoCarrito.mayoristas && productoCarrito.mayoristas.length > 0 ? productoCarrito.mayoristas[0].nombre_mayorista : 'Sin mayorista'})
+                            </Typography>
+                        </Box>
                     <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
                         <Typography variant='body2' sx={{padding: 0 }}>
                             {productoCarrito.precio}
