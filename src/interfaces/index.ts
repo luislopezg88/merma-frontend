@@ -1,7 +1,7 @@
 import { Dayjs } from 'dayjs'
 
 export interface IProducto {
-    id?: string;
+    id: string;
     nombre?: string;
     descripcion?: string;
     imagen?: string;

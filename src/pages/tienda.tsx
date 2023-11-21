@@ -15,7 +15,7 @@ import { Box, Radio } from '@mui/material';
 const CardBasic = () => {
     const [productos, setProductos] = useState<IProducto[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<IProducto | null>(null);
-    const [selectedMayoristas, setSelectedMayoristas] = useState<{ [key: string]: IMayorista | null }>({});
+    const [selectedMayoristas, setSelectedMayoristas] = useState<{ [key: string]: string | null }>({});
     const [carrito, setCarrito] = useState<IProducto[]>([]);
 
     useEffect(() => {
@@ -40,12 +40,21 @@ const CardBasic = () => {
     };
 
     const handleProductChange = (producto: IProducto, mayorista: IMayorista) => {
-        setSelectedProduct(producto);
-        setSelectedMayoristas((prevSelectedMayoristas) => ({
-            ...prevSelectedMayoristas,
-            [producto.id || ""]: mayorista,
+        console.log('Producto seleccionado:', producto);
+        console.log('Mayorista seleccionado:', mayorista);
+    
+        // Actualiza el estado con el producto y mayorista seleccionados
+        setSelectedProduct({
+          ...producto,
+          mayoristas: [mayorista],
+        });
+    
+        // Almacena el ID del mayorista seleccionado para el producto actual
+        setSelectedMayoristas((prevMayoristas) => ({
+          ...prevMayoristas,
+          [producto.id]: mayorista.id_mayorista,
         }));
-    };    
+    };
 
     const handleAgregarAlCarrito = () => {
         if (selectedProduct) {
@@ -77,7 +86,7 @@ const CardBasic = () => {
             {productos.map((producto) => (
                 <Grid key={producto.id} item xs={12} sm={6} md={4}>
                     <Card>
-                        <CardMedia sx={{ height: '9.375rem' }} style={{background: "#ccc"}} image={`${API_URL}/imagenes/productos/${producto.imagen}`} />
+                        <CardMedia sx={{ height: '9.375rem' }} style={{background: "#ccc"}} image={`${producto.imagen}`} /> 
                         <CardContent sx={{ padding: theme => `${theme.spacing(3, 5.25, 4)} !important` }}>
                             <Typography variant='h6' sx={{ marginBottom: 2 }}>
                                 {producto.nombre}
@@ -89,7 +98,7 @@ const CardBasic = () => {
                                             value={mayorista.id_mayorista}
                                             checked={
                                                 selectedProduct?.id === producto.id &&
-                                                selectedMayoristas[producto.id || ""]?.id_mayorista === mayorista.id_mayorista
+                                                selectedMayoristas[producto.id] === mayorista.id_mayorista
                                             }
                                             onChange={() => handleProductChange(producto, mayorista)}
                                         />

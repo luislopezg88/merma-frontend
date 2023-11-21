@@ -87,7 +87,7 @@ const Home = () => {
             formData.append("file", img, img.name);
           }
 
-          const response = await fetch(`${API_URL}/productos/${producto.id}`, {
+          const response = await fetch(`${API_URL}/productos`, { //${producto.id}
             method: "POST",
             //headers: { "Content-Type": "application/json" },
             //body: JSON.stringify(bodySend)
