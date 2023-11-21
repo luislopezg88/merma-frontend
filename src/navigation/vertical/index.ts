@@ -22,12 +22,22 @@ const navigation = (): VerticalNavItemsType => {
       path: '/'
     },
     {
-      title: 'Licitaciones',
-      icon: ListStatus,
-      path: '/licitaciones'
+      title: 'Tienda',
+      icon: CreditCardOutline,
+      path: '/tienda'
     },
     {
-      title: 'Account Settings',
+      title: 'Productos',
+      icon: ListStatus,
+      path: '/productos'
+    },
+    {
+      title: 'Inventario',
+      icon: Table,
+      path: '/inventario'
+    },
+    {
+      title: 'Cuenta',
       icon: AccountCogOutline,
       path: '/account-settings'
     },
