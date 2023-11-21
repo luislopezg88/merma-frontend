@@ -86,7 +86,11 @@ const CardBasic = () => {
             {productos.map((producto) => (
                 <Grid key={producto.id} item xs={12} sm={6} md={4}>
                     <Card>
-                        <CardMedia sx={{ height: '9.375rem' }} style={{background: "#ccc"}} image={`${producto.imagen}`} /> 
+                        <CardMedia 
+                            sx={{   height: '9.375rem', backgroundColor: "#ffffff", backgroundSize: "contain",
+                                    backgroundPosition: "center", backgroundRepeat: "no-repeat", borderBottom: "1px solid #ccc" }} 
+                            image={`${producto.imagen}`} 
+                        /> 
                         <CardContent sx={{ padding: theme => `${theme.spacing(3, 5.25, 4)} !important` }}>
                             <Typography variant='h6' sx={{ marginBottom: 2 }}>
                                 {producto.nombre}
@@ -101,6 +105,7 @@ const CardBasic = () => {
                                                 selectedMayoristas[producto.id] === mayorista.id_mayorista
                                             }
                                             onChange={() => handleProductChange(producto, mayorista)}
+                                            sx={{padding:"0px"}}
                                         />
                                         ${producto.precio} ({mayorista.nombre_mayorista})
                                     </Typography>
