@@ -5,14 +5,16 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { IProducto, IMayorista } from 'src/interfaces' // Ajusta según tu interfaz real
 import { API_URL } from 'src/configs/constans'
+import Delete from 'mdi-material-ui/Delete'
+import PlusCircle from 'mdi-material-ui/PlusCircle'
+import MinusCircle from 'mdi-material-ui/MinusCircle'
 
 // ** Demo Components Imports
 import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
-import { Box, Menu, Radio } from '@mui/material';
-
+import { Box, IconButton, Menu, Radio } from '@mui/material';
 
 const CardBasic = () => {
     const [productos, setProductos] = useState<IProducto[]>([]);
@@ -85,17 +87,23 @@ const CardBasic = () => {
 
     const handleIncrementarCantidad = (productoId: string) => {
         setCarrito(prevCarrito =>
-            prevCarrito.map(producto =>
-                producto.id === productoId.toString() ? { ...producto, cantidad: producto.cantidad + 1 } : producto
-            )
+          prevCarrito.map(producto => {
+            if (producto.id === productoId.toString() && producto.cantidad !== undefined) {
+              return { ...producto, cantidad: producto.cantidad + 1 };
+            }
+            return producto;
+          })
         );
     };
     
     const handleDecrementarCantidad = (productoId: string) => {
         setCarrito(prevCarrito =>
-            prevCarrito.map(producto =>
-                producto.id === productoId.toString() && producto.cantidad > 1 ? { ...producto, cantidad: producto.cantidad - 1 } : producto
-            )
+          prevCarrito.map(producto => {
+            if (producto.id === productoId.toString() && producto.cantidad !== undefined && producto.cantidad > 1) {
+              return { ...producto, cantidad: producto.cantidad - 1 };
+            }
+            return producto;
+          })
         );
     };
     
@@ -206,16 +214,16 @@ const CardBasic = () => {
                         </Box>
             <Box component='span' sx={{ width: '50%', float: 'right', textAlign: 'right' }}>
                 <IconButton onClick={() => handleDecrementarCantidad(productoCarrito.id)} disabled={productoCarrito.cantidad === 1}>
-                    <RemoveIcon />
+                    <MinusCircle />
                 </IconButton>
                 <Typography component='span' sx={{ margin: '0 0.5rem' }}>
                     {productoCarrito.cantidad}
                 </Typography>
                 <IconButton onClick={() => handleIncrementarCantidad(productoCarrito.id)}>
-                    <AddIcon />
+                    <PlusCircle />
                 </IconButton>
                 <IconButton onClick={() => handleEliminarProducto(productoCarrito.id)}>
-                    <DeleteIcon />
+                    <Delete sx={{ color: "#ff3e1d" }} />
                 </IconButton>
             </Box>
         </Card>

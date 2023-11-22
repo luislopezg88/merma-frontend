@@ -6,6 +6,7 @@ export interface IProducto {
     descripcion?: string;
     imagen?: string;
     precio?: number;
+    cantidad?: number;
     mayoristas?: IMayorista[] | null;
     
 }

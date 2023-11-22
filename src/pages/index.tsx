@@ -25,7 +25,7 @@ import { AuthResponse, AuthResponseError } from 'src/configs/types'
 const Home = () => {
 
   const auth = useAuth();
-  const [empresa, setempresa] = useState<IMayorista>({
+  const [mayorista, setmayorista] = useState<IMayorista>({
     id: '',
     nombre: '',
     descripcion: '',
@@ -42,8 +42,8 @@ const Home = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {name, value} = e.target;
-    setempresa({
-      ...empresa,
+    setmayorista({
+      ...mayorista,
       [name]: value
     })
   }
@@ -51,35 +51,9 @@ const Home = () => {
 
   const handleChangeSelect = (e: SelectChangeEvent) => {
     const {name, value} = e.target;
-    setempresa({
-      ...empresa,
+    setmayorista({
+      ...mayorista,
       [name]: value
-    })
-  }
-
-  const addTag = () => {
-    if(tag == ''){
-      return
-    }
-    let currentTags: Array<string> = [];
-    currentTags = empresa.tags ? empresa.tags : []
-    currentTags.push(tag)
-    setempresa({
-      ...empresa,
-      tags: currentTags
-    })
-    setTag('')
-  }
-
-  const handleDelete = (index: number) => {
-    let currentTags: Array<string> = [];
-    if(empresa.tags){
-      currentTags = empresa.tags
-    }
-    currentTags.splice(index, 1);
-    setempresa({
-      ...empresa,
-      tags: currentTags
     })
   }
 
@@ -87,18 +61,18 @@ const Home = () => {
     //e.preventDefault();
     // auth.setIsAuthenticated(true);
     console.log(API_URL);
-    if(empresa.nombre == '' || empresa.descripcion == ''){
+    if(mayorista.nombre == '' || mayorista.descripcion == ''){
       alert('debe llenar todos los campos')
       return 
     } else {
       try {
-        if(empresa.id != '' && empresa.id != null) { //update empresa
+        if(mayorista.id != '' && mayorista.id != null) { //update mayorista
           const bodySend = {
-            ...empresa,
-            empleados: parseInt(empresa?.empleados, 10),
-            tags: JSON.stringify(empresa.tags),
+            ...mayorista,
+            empleados: parseInt(mayorista?.empleados, 10),
+            tags: JSON.stringify(mayorista.tags),
           }
-          const response = await fetch(`${API_URL}/empresas/save/${empresa.id}`, {
+          const response = await fetch(`${API_URL}/mayoristas/save/${mayorista.id}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(bodySend)
@@ -110,14 +84,14 @@ const Home = () => {
             const json = (await response.json()) as AuthResponseError;
             setErrorResponse(json.body.error);
           }
-        } else { //create empresa
+        } else { //create mayorista
           const bodySend = {
-            ...empresa,
-            empleados: parseInt(empresa?.empleados, 10),
-            tags: JSON.stringify(empresa.tags),
+            ...mayorista,
+            empleados: parseInt(mayorista?.empleados, 10),
+            tags: JSON.stringify(mayorista.tags),
             id_user: auth.getUser()?.id
           }
-          const response = await fetch(`${API_URL}/empresas`, {
+          const response = await fetch(`${API_URL}/mayoristas`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(bodySend)
@@ -138,7 +112,7 @@ const Home = () => {
 
   const getCompanyData = async () =>{
     try {
-      const response = await fetch(`${API_URL}/empresas?user=${auth.getUser()?.id}`, {
+      const response = await fetch(`${API_URL}/mayoristas?user=${auth.getUser()?.id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -147,7 +121,7 @@ const Home = () => {
         console.log(json);
         if(json && json.length > 0){
           const dataResponse = json[0];
-          setempresa({
+          setmayorista({
             id: dataResponse._id,
             nombre: dataResponse.nombre,
             tipo: dataResponse.tipo,
@@ -172,7 +146,7 @@ const Home = () => {
 
   const searchOpornunities = async () =>{
     try {
-      const response = await fetch(`${API_URL}/empresas/consultarLicitaciones/${auth.getUser()?.id}`, {
+      const response = await fetch(`${API_URL}/mayoristas/consultarLicitaciones/${auth.getUser()?.id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -193,7 +167,7 @@ const Home = () => {
       <Grid item xs={12} md={12}>
 
         <Card>
-          <CardHeader title='Datos de la empresa' titleTypographyProps={{ variant: 'h1' }} />
+          <CardHeader title='Datos de la mayorista' titleTypographyProps={{ variant: 'h1' }} />
             <CardContent>
 
             <Grid container spacing={6}>
@@ -202,27 +176,27 @@ const Home = () => {
                   fullWidth
                   type='text'
                   label='Nombre'
-                  placeholder='nombre de la empresa'
-                  value={empresa.nombre}
+                  placeholder='nombre de la mayorista'
+                  value={mayorista.nombre}
                   name='nombre'
                   onChange={handleChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
-                  <InputLabel id='form-layouts-separator-select-label'>Tipo de empresa</InputLabel>
+                  <InputLabel id='form-layouts-separator-select-label'>Tipo de mayorista</InputLabel>
                   <Select
-                    label='Tipo de empresa'
+                    label='Tipo de mayorista'
                     defaultValue=''
                     id='form-layouts-separator-select'
                     labelId='form-layouts-separator-select-label'
-                    value={empresa.tipo}
+                    value={mayorista.tipo}
                     name='tipo'
                     onChange={handleChangeSelect}
                   >
-                    <MenuItem value='microempresa'>Microempresas</MenuItem>
-                    <MenuItem value='pyme'>Pequeñas y medianas empresas (PYME)</MenuItem>
-                    <MenuItem value='grande'>Grandes empresas</MenuItem>
+                    <MenuItem value='micromayorista'>Micromayoristas</MenuItem>
+                    <MenuItem value='pyme'>Pequeñas y medianas mayoristas (PYME)</MenuItem>
+                    <MenuItem value='grande'>Grandes mayoristas</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -231,10 +205,10 @@ const Home = () => {
                 <TextField
                   fullWidth
                   label='Descripción'
-                  placeholder='describe tu empresa'
+                  placeholder='describe tu mayorista'
                   multiline
                   rows={2}
-                  value={empresa.descripcion}
+                  value={mayorista.descripcion}
                   name='descripcion'
                   onChange={handleChange}
                 />
@@ -245,7 +219,7 @@ const Home = () => {
                   fullWidth
                   type='number'
                   label='N° de empleados'
-                  value={empresa.empleados}
+                  value={mayorista.empleados}
                   name='empleados'
                   onChange={handleChange}
                 />
@@ -259,7 +233,7 @@ const Home = () => {
                     defaultValue=''
                     id='form-layouts-separator-select'
                     labelId='form-layouts-separator-select-label'
-                    value={empresa.finalidad}
+                    value={mayorista.finalidad}
                     name='finalidad'
                     onChange={handleChangeSelect}
                   >
@@ -278,7 +252,7 @@ const Home = () => {
                     defaultValue=''
                     id='form-layouts-separator-select'
                     labelId='form-layouts-separator-select-label'
-                    value={empresa.instrumento}
+                    value={mayorista.instrumento}
                     name='instrumento'
                     onChange={handleChangeSelect}
                   >
@@ -298,7 +272,7 @@ const Home = () => {
                     defaultValue=''
                     id='form-layouts-separator-select'
                     labelId='form-layouts-separator-select-label'
-                    value={empresa.administracion}
+                    value={mayorista.administracion}
                     name='administracion'
                     onChange={handleChangeSelect}
                   >
@@ -317,7 +291,7 @@ const Home = () => {
                     defaultValue=''
                     id='form-layouts-separator-select'
                     labelId='form-layouts-separator-select-label'
-                    value={empresa.organo}
+                    value={mayorista.organo}
                     name='organo'
                     onChange={handleChangeSelect}
                   >
@@ -380,7 +354,7 @@ const Home = () => {
                             flexWrap: 'wrap'
                           }}
                         >
-                          {empresa.tags.map((t: string, index: number) => (
+                          {mayorista.tags.map((t: string, index: number) => (
                             <Chip label={t} variant="outlined" sx={{ mr: 5 }} onDelete={() => handleDelete(index)}  key={t+ '-'+ index}/>
                           ))}
                         </Box>
