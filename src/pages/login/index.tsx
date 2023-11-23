@@ -60,81 +60,69 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
 }))
 
 const LoginPage = () => {
-  // ** State
   const [values, setValues] = useState<State>({
     email: '',
     password: '',
-    showPassword: false
-  })
-  const [errorResponse, setErrorResponse] = useState("");
+    showPassword: false,
+  });
+  const [errorResponse, setErrorResponse] = useState<string | null>(null); // Updated to specify the type
 
-  // ** Hook
-  const theme = useTheme()
-  const router = useRouter()
+  const theme = useTheme();
+  const router = useRouter();
   const auth = useAuth();
 
   const handleChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-    setValues({ ...values, [prop]: event.target.value })
-  }
+    setValues({ ...values, [prop]: event.target.value });
+  };
 
   const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword })
-  }
+    setValues({ ...values, showPassword: !values.showPassword });
+  };
 
   const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-  }
-  
+    event.preventDefault();
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // auth.setIsAuthenticated(true);
-    console.log(API_URL);
-    if(values.email == '' || values.password == ''){
-      alert('debe llenar todos los campos')
-      return 
-    } else {
-      try {
-        const response = await fetch(`${API_URL}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: values.email, password: values.password }),
-        });
-        if (response.ok) {
-          const json = (await response.json()) as AuthResponse;
-          console.log(json);
-  
-          //if (json.body.accessToken && json.body.refreshToken) {
-            auth.saveUser(json);
-          //}
-        } else {
-          const json = (await response.json()) as AuthResponseError;
-          setErrorResponse(json.body.error);
-        }
-      } catch (error) {
-        console.log(error);
+
+    if (values.email === '' || values.password === '') {
+      alert('Debe llenar todos los campos');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email, password: values.password }),
+      });
+
+      if (response.ok) {
+        const json = (await response.json()) as AuthResponse;
+
+        auth.saveUser(json);
+      } else {
+        const json = (await response.json()) as AuthResponseError;
+        setErrorResponse(json.body.error);
       }
+    } catch (error) {
+      console.error('Error:', error);
     }
   }
-  
-  if (auth.isAuthenticated) {
-    const user = auth.getUser()!;
 
-    if (user !== undefined) {
+  if (auth.isAuthenticated) {
+    const user = auth.getUser();
+
+    if (user) {
       const rol = user.rol;
-      //console.log(rol); // Imprime el valor de la propiedad 'rol' si 'user' no es 'undefined'
-      if(rol == 'mayorista'){
-        return router.push('/dashboard')
-      }else{
-        return router.push('/tienda')
+
+      if (rol === 'mayorista') {
+        router.push('/dashboard');
+      } else {
+        router.push('/tienda');
       }
-    } else {
-      console.log("No se encontró ningún usuario autenticado.");
     }
-    /*
-    setTimeout(()=>{
-      return router.push('/')
-    },10)
-    */
   }
 
   return (

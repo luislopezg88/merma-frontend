@@ -20,10 +20,10 @@ import Chip from '@mui/material/Chip'
 import { Box, IconButton, Input, InputAdornment } from '@mui/material'
 
 import { Iinventario } from 'src/interfaces'
-import { API_URL } from 'src/configs/constans'
+import { API_URL } from '../configs/constans'
 import { AuthResponse, AuthResponseError } from 'src/configs/types'
 
-const Home = () => {
+const Inventario = () => {
 
   const auth = useAuth();
   const [inventario, setInventario] = useState<IInventario>({
@@ -146,26 +146,7 @@ const Home = () => {
     } catch (error) {
       console.log(error);
     }
-  }  
-
-  const searchOpornunities = async () =>{
-    try {
-      const response = await fetch(`${API_URL}/inventarios/consultarLicitaciones/${auth.getUser()?.id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = (await response.json()) as any;
-        console.log(json);
-      } else {
-        const json = (await response.json()) as AuthResponseError;
-        setErrorResponse(json.body.error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
   }
-
 
   return (
     <Grid container spacing={6}>
@@ -238,4 +219,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Inventario

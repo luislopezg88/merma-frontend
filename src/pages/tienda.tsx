@@ -160,9 +160,8 @@ const CardBasic = () => {
 
     const handleGuardarCarrito = async () => {
         try {
-            //const user = auth.getUser();
-            //console.log(user);
-            const id_cliente = '655d36623319990cd9d4393a'; //user.id;
+            const user = auth.getUser();
+            const id_cliente = user?.id;
             // Obtener los datos necesarios del carrito
             const datosCarrito = carrito.map(item => {
                 const { id, mayoristas, precio, precio_descuento, cantidad } = item;

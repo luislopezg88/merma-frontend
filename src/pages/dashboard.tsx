@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 //Service
 import { API_URL } from 'src/configs/constans'
 //Hook
-import { useAuth } from 'src/context/AuthProvider'
+import { useAuth } from '../context/AuthProvider'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,7 +27,7 @@ ChartJS.register(
 );
 
 const Dashboard = () => {
-  const sesion = useAuth();
+  const auth = useAuth();
   const { idChef } = useParams();
   //const history = useNavigate();
   const [ventasPorChef, setVentasPorChef] = useState([]);
@@ -47,122 +47,55 @@ const Dashboard = () => {
     },
   };  
 
-  const labels = ["noviembre", "diciembre"];
+  const labels = ["Noviembre", "Diciembre"];
 
   //Solicitud
-  const fetchingVentasPorChef = async () => {
-    try {
-      const response = await fetch(`${API_URL}/dashboard/ventasPorChef`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = await response.json();
-
-        const clone = json.body.data.map((item: { nombreChef: any; totalVentas: any; }, i: number) => {
-          const hue = (i * 50) % 360; // Ajusta el 50 para obtener colores distintos
-          const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`;
-
-          return {
-            label: item.nombreChef,
-            data: [item.totalVentas],
-            backgroundColor: backgroundColor,
-          };
-        });
-
-        setVentasPorChef(clone);
-      } else {
-        const json = await response.json();
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const fetchingPlatosVendidos = async () => {
     try {
-      const response = await fetch(`${API_URL}/dashboard/platosVendidos`, {
+      const response = await fetch(`${API_URL}/dashboard/ventas/${auth.getUser()?.id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
+  
       if (response.ok) {
         const json = await response.json();
-
-        const clone = json.body.data.map((item: { nombrePlato: any; totalVentas: any; }, i: number) => {
+  
+        const clone = json.body.data.map((item: { nombreProducto: any; totalVentas: any; porcentajeDescuento: any }, i: number) => {
           const hue = (i * 50) % 360; // Ajusta el 50 para obtener colores distintos
           const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`;
-
+  
           return {
-            label: item.nombrePlato,
+            label: item.nombreProducto,
             data: [item.totalVentas],
             backgroundColor: backgroundColor,
+            porcentajeDescuento: item.porcentajeDescuento, // Nuevo campo para el porcentaje de descuento
           };
         });
-        setPlatosVendidos(clone);
+  
+        setVentasPorChef(clone);
       } else {
-        const json = await response.json();
+        // Manejar la respuesta no exitosa si es necesario
       }
     } catch (error) {
       console.error(error);
     }
-  };
+  };  
 
-  const fetchingPlatosChef = async (id: string | undefined) => {
-    try {
-      const response = await fetch(
-        `${API_URL}/dashboard/platosVendidos/${id}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      if (response.ok) {
-        const json = await response.json();
-
-        const clone = json.body.data.map((item: { nombrePlato: any; totalVentas: any; }, i: number) => {
-          const hue = (i * 50) % 360; // Ajusta el 50 para obtener colores distintos
-          const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`;
-
-          return {
-            label: item.nombrePlato,
-            data: [item.totalVentas],
-            backgroundColor: backgroundColor,
-          };
-        });
-        setPlatosChef(clone);
-      } else {
-        const json = await response.json();
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
   //DataSet
   const data = {
     labels,
-    datasets: ventasPorChef,
-  };
-
-  const dataDos = {
-    labels,
-    datasets: platosVendidos,
-  };
-
-  const dataTres = {
-    labels,
-    datasets: platosChef,
+    datasets: ventasPorChef.map((item: { label: any; data: any; backgroundColor: any; porcentajeDescuento: any }) => ({
+      label: `${item.label} (${item.porcentajeDescuento}%)`, // Etiqueta modificada para incluir el porcentaje de descuento
+      data: item.data,
+      backgroundColor: item.backgroundColor,
+    })),
   };
 
   useEffect(() => {
-    fetchingVentasPorChef();
     fetchingPlatosVendidos();
-  }, [sesion]);
+  }, [auth]);
 
-  useEffect(() => {
-    if (idChef !== "") {
-      fetchingPlatosChef(idChef);
-    }
-  }, [idChef]);
   return (
     <>
       {/*<NavbarSesion />*/}
@@ -171,23 +104,9 @@ const Dashboard = () => {
           <div className="mt-5 py-5 border-top text-center">
             <Row className="justify-content-center mb-5">
               <Col lg="12">
-                <h2>Ventas por chefs</h2>
+                <h2>Ventas por productos</h2>
               </Col>
               <Bar options={options} data={data} />
-            </Row>
-            <Row className="justify-content-center my-5">
-              <Col lg="12">
-                <h2>Platos vendidos de todos los chefs</h2>
-              </Col>
-              <Bar options={options} data={dataDos} />
-            </Row>
-            <Row className="justify-content-center my-5">
-              <Col lg="12">
-                <h2>
-                  Platos vendidos del chef {/*sesion?.info?.name ?? ""*/}
-                </h2>
-              </Col>
-              <Bar options={options} data={dataTres} />
             </Row>
           </div>
         </section>
