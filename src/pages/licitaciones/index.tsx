@@ -63,30 +63,9 @@ const Row = (props: { row: ReturnType<typeof createData> }) => {
 
 
   const expandCollapse = () => {
-    getLicitacion()
     setOpen(!open)
   }
 
-  const getLicitacion = async () => {
-    try {
-      const response = await fetch(`${API_URL}/licitaciones/${row._id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = (await response.json()) as any;
-        console.log(json);
-        if(json && json.length > 0){
-          
-        }
-      } else {
-        const json = (await response.json()) as AuthResponseError;
-        //setErrorResponse(json.body.error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   return (
     <Fragment>
@@ -160,38 +139,8 @@ const Licitaciones = () => {
   const [licitaciones, setLicitaciones] = useState([]);
 
   useEffect(() => {
-    getLicitacionData()
+    
   }, [])
-
-  const getLicitacionData = async () =>{
-    try {
-      const response = await fetch(`${API_URL}/licitaciones?user=${auth.getUser()?.id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = (await response.json()) as any;
-        console.log(json);
-        if(json && json.length > 0){
-          const dataResponse = json;
-          const formatData: any = [];
-          dataResponse.forEach((d: any) => {
-            formatData.push(
-              createData(d._id, d.nombre, d.inicio, d.fin, d.presupuesto, 3.9, 1.5)
-            )
-          });
-          setLicitaciones(formatData);
-
-        }
-      } else {
-        const json = (await response.json()) as AuthResponseError;
-        setErrorResponse(json.body.error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  } 
-
 
   return ( 
 

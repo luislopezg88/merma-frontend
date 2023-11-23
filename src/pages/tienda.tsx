@@ -336,7 +336,7 @@ const CardBasic = () => {
                 </Card>
                 </Grid>
                 {carrito.map(productoCarrito => (
-                <Grid item xs={12} md={12}>
+                <Grid item xs={12} md={12} key={productoCarrito.id}>
                     <Card key={productoCarrito.id} sx={{ padding: '0.5rem !important' }}>
                         <Box component='span' sx={{ fontWeight: 500, width: '55%', float: 'left' }}>
                             <Typography sx={{ fontWeight: 500, marginBottom: 1, padding: 0 }}>

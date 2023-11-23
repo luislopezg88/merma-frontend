@@ -44,7 +44,7 @@ const Home = () => {
   })
 
   useEffect(() => {
-    getCompanyData();
+    
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,53 +132,6 @@ const Home = () => {
       }
     }
   }
-
-  const getCompanyData = async () =>{
-    try {
-      const response = await fetch(`${API_URL}/productos?user=${auth.getUser()?.id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = (await response.json()) as any;
-        console.log(json);
-        if(json && json.length > 0){
-          const dataResponse = json[0];
-          setProducto({
-            id: dataResponse._id,
-            nombre: dataResponse.nombre,
-            imagen: dataResponse.imagen,
-            descripcion: dataResponse.descripcion,
-            precio: dataResponse.precio,
-          })
-        }
-      } else {
-        const json = (await response.json()) as AuthResponseError;
-        setErrorResponse(json.body.error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }  
-
-  const searchOpornunities = async () =>{
-    try {
-      const response = await fetch(`${API_URL}/productos/consultarLicitaciones/${auth.getUser()?.id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const json = (await response.json()) as any;
-        console.log(json);
-      } else {
-        const json = (await response.json()) as AuthResponseError;
-        setErrorResponse(json.body.error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
     
   const onChangeImage: ChangeEventHandler<HTMLInputElement> = (e) => {
       // Verifica si hay archivos seleccionados
@@ -186,8 +139,8 @@ const Home = () => {
         return;
       }
       
-      let files = e.target.files;
-      let name = files[0]?.name ?? "";
+      const files = e.target.files;
+      const name = files[0]?.name ?? "";
 
       setProducto((prev) => ({
         ...prev,

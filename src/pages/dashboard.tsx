@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Button, Card, Container, Row, Col } from "reactstrap";
-import { useNavigate, useParams } from "react-router-dom";
+import { Row, Col } from "reactstrap";
+import { useParams } from "react-router-dom";
 //import NavbarSesion from "components/Navbars/NavbarSesion.js";
 //Service
 import { API_URL } from 'src/configs/constans'
@@ -28,11 +28,8 @@ ChartJS.register(
 
 const Dashboard = () => {
   const auth = useAuth();
-  const { idChef } = useParams();
   //const history = useNavigate();
   const [ventasPorChef, setVentasPorChef] = useState([]);
-  const [platosVendidos, setPlatosVendidos] = useState([]);
-  const [platosChef, setPlatosChef] = useState([]);
 
   const options = {
     responsive: true,
@@ -94,7 +91,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchingPlatosVendidos();
-  }, [auth]);
+  });
 
   return (
     <>
