@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { IProducto, IMayorista } from 'src/interfaces' // Ajusta según tu interfaz real
+import { useAuth } from 'src/context/AuthProvider'
 import { API_URL } from 'src/configs/constans'
 import Delete from 'mdi-material-ui/Delete'
 import PlusCircle from 'mdi-material-ui/PlusCircle'
@@ -22,6 +23,7 @@ const CardBasic = () => {
     const [selectedMayoristas, setSelectedMayoristas] = useState<{ [key: string]: string | null }>({});
     const [carrito, setCarrito] = useState<IProducto[]>([]);
     const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+    const auth = useAuth();
     // ** Hooks
     const router = useRouter()
 
@@ -63,7 +65,7 @@ const CardBasic = () => {
         }));
     };
 
-    const handleAgregarAlCarrito = () => {
+    {/*const handleAgregarAlCarrito = () => {
         if (selectedProduct) {
             const mayoristaId = selectedMayoristas[selectedProduct.id];
             const mayorista = selectedProduct.mayoristas?.find(m => m.id_mayorista === mayoristaId);
@@ -77,7 +79,43 @@ const CardBasic = () => {
             setSelectedProduct(null);
             setSelectedMayoristas({});
         }
-    };    
+    };*/}
+
+    const handleAgregarAlCarrito = () => {
+        if (selectedProduct) {
+          const mayoristaId = selectedMayoristas[selectedProduct.id];
+          const mayorista = selectedProduct.mayoristas?.find(m => m.id_mayorista === mayoristaId);
+          const productoConMayorista = {
+            ...selectedProduct,
+            mayoristas: mayorista ? [mayorista] : [],
+            cantidad: 1, // Cantidad predeterminada
+          };
+
+          console.log(productoConMayorista);
+      
+          // Calcula el descuento y aplica al precio
+          const fechaVencimiento = mayorista?.fecha_vencimiento ? new Date(mayorista.fecha_vencimiento) : undefined;
+            const descuento = calcularDescuento(fechaVencimiento);
+
+          const precioConDescuento = (productoConMayorista?.precio ?? 0) * (1 - descuento);
+          console.log(mayorista?.fecha_vencimiento);
+          console.log(productoConMayorista?.precio);
+          console.log(descuento);
+      
+          // Agrega el producto con ambos precios al carrito
+          setCarrito(prevCarrito => [
+            ...prevCarrito,
+            {
+              ...productoConMayorista,
+              precio_descuento: precioConDescuento,
+            },
+          ]);
+      
+          // Limpiar la selección actual después de agregar al carrito
+          setSelectedProduct(null);
+          setSelectedMayoristas({});
+        }
+    };      
 
     const handleVerCarrito = (event: SyntheticEvent) => {
         // Muestra la sección del carrito, por ejemplo, a través de un modal, un componente emergente, etc.
@@ -120,6 +158,81 @@ const CardBasic = () => {
         setAnchorEl(null)
     }
 
+    const handleGuardarCarrito = async () => {
+        try {
+            //const user = auth.getUser();
+            //console.log(user);
+            const id_cliente = '655d36623319990cd9d4393a'; //user.id;
+            // Obtener los datos necesarios del carrito
+            const datosCarrito = carrito.map(item => {
+                const { id, mayoristas, precio, precio_descuento, cantidad } = item;
+                const { id_mayorista, fecha_vencimiento } = mayoristas?.[0] || { id_mayorista: '', fecha_vencimiento: null }; // Usar optional chaining y proporcionar un objeto vacío por defecto
+            
+                //console.log('fecha_vencimiento: ' + fecha_vencimiento);
+            
+                return {
+                id,
+                id_cliente,
+                id_mayorista,
+                fecha_vencimiento,
+                precio,
+                precio_descuento,
+                cantidad
+                };
+            });
+  
+            // Enviar los datos a la API
+            const response = await fetch(`${API_URL}/carrito`, {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(datosCarrito),
+            });
+      
+          if (response.ok) {
+            // Los datos se guardaron exitosamente en la base de datos
+            console.log('Los datos del carrito se guardaron correctamente.');
+          } else {
+            // Ocurrió un error al guardar los datos en la base de datos
+            console.error('Error al guardar los datos del carrito.');
+          }
+        } catch (error) {
+          // Ocurrió un error en la solicitud
+          console.error('Error en la solicitud:', error);
+        }
+    };
+
+    const total = carrito.reduce((accumulator, productoCarrito) => {
+        const subtotal = (productoCarrito.precio_descuento ?? 0) * (productoCarrito.cantidad ?? 0);
+        return accumulator + subtotal;
+    }, 0);
+
+    const calcularDescuento = (fechaVencimiento?: Date | null): number => {
+        const hoy = new Date();
+
+        if (!fechaVencimiento || !(fechaVencimiento instanceof Date)) {
+            console.log('Fecha de vencimiento no válida:', fechaVencimiento);
+            return 0; // Sin descuento si la fecha de vencimiento es null, undefined o no es un objeto Date
+        }
+
+        const diasRestantes = Math.floor((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+        console.log('Días restantes:', diasRestantes);
+
+        if (diasRestantes <= 5) {
+            return 0.7; // 70% de descuento
+        } else if (diasRestantes <= 15) {
+            return 0.5; // 50% de descuento
+        } else if (diasRestantes <= 30) {
+            return 0.3; // 30% de descuento
+        } else if (diasRestantes <= 60) {
+            return 0.1; // 10% de descuento
+        } else {
+            return 0; // Sin descuento
+        }
+    };
+     
+
     return (
         <Grid container spacing={6}>
             <Grid item xs={12} sx={{ paddingBottom: 4 }}>
@@ -155,9 +268,26 @@ const CardBasic = () => {
                                                 selectedMayoristas[producto.id] === mayorista.id_mayorista
                                             }
                                             onChange={() => handleProductChange(producto, mayorista)}
-                                            sx={{padding:"0px"}}
+                                            sx={{ padding: "0px" }}
                                         />
-                                        ${producto.precio} ({mayorista.nombre_mayorista})
+                                        {producto.precio !== undefined && (
+                                            <span style={{ fontWeight: "bold" }}>
+                                                ${(producto.precio * (1 - calcularDescuento(mayorista?.fecha_vencimiento ? new Date(mayorista.fecha_vencimiento) : undefined))).toFixed(2)}
+                                            </span>
+                                        )}
+                                        <span style={{ textDecoration: "line-through", paddingLeft: '20px' }}>
+                                            {producto.precio !== undefined ? `$${producto.precio}` : 'Precio no disponible'}
+                                        </span>
+                                        {' '}
+                                        <span>
+                                            ({mayorista.nombre_mayorista})
+                                        </span>
+                                        <br />
+                                        <span style={{ color: "red" }}>
+                                            Descuento: {calcularDescuento(mayorista?.fecha_vencimiento ? new Date(mayorista.fecha_vencimiento) : undefined) * 100}%
+                                        </span>
+                                        <br />
+                                        
                                     </Typography>
                                 </div>
                             ))}
@@ -187,17 +317,19 @@ const CardBasic = () => {
                     md={12}
                 >
                 <Card sx={{ padding: '0.5rem !important' }}>                    
-                    <Box component='span' sx={{ fontWeight: 500, width: '50%', float: 'left' }}>
+                    <Box component='span' sx={{ fontWeight: 500, width: '55%', float: 'left' }}>
                         <Typography variant='body2' sx={{padding: 0 }} >
                             Producto
                         </Typography>
                     </Box>
-                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
+
+                    <Box component='span' sx={{ fontWeight: 500, width: '30%', float: 'left' }}>
                         <Typography variant='body2' sx={{padding: 0 }}>
                             Cantidad
                         </Typography>
                     </Box>
-                    <Box component='span' sx={{ fontWeight: 500, width: '25%', float: 'left' }}>
+
+                    <Box component='span' sx={{ fontWeight: 500, width: '15%', float: 'left', textAlign: 'right' }}>
                         <Typography variant='body2' sx={{padding: 0 }}>
                             Precio
                         </Typography>
@@ -207,28 +339,52 @@ const CardBasic = () => {
                 {carrito.map(productoCarrito => (
                 <Grid item xs={12} md={12}>
                     <Card key={productoCarrito.id} sx={{ padding: '0.5rem !important' }}>
-                        <Box component='span' sx={{ fontWeight: 500, width: '50%', float: 'left' }}>
+                        <Box component='span' sx={{ fontWeight: 500, width: '55%', float: 'left' }}>
                             <Typography sx={{ fontWeight: 500, marginBottom: 1, padding: 0 }}>
                                 {productoCarrito.nombre} ({productoCarrito.mayoristas && productoCarrito.mayoristas.length > 0 ? productoCarrito.mayoristas[0].nombre_mayorista : 'Sin mayorista'})
                             </Typography>
                         </Box>
-            <Box component='span' sx={{ width: '50%', float: 'right', textAlign: 'right' }}>
-                <IconButton onClick={() => handleDecrementarCantidad(productoCarrito.id)} disabled={productoCarrito.cantidad === 1}>
-                    <MinusCircle />
-                </IconButton>
-                <Typography component='span' sx={{ margin: '0 0.5rem' }}>
-                    {productoCarrito.cantidad}
-                </Typography>
-                <IconButton onClick={() => handleIncrementarCantidad(productoCarrito.id)}>
-                    <PlusCircle />
-                </IconButton>
-                <IconButton onClick={() => handleEliminarProducto(productoCarrito.id)}>
-                    <Delete sx={{ color: "#ff3e1d" }} />
-                </IconButton>
-            </Box>
-        </Card>
-    </Grid>
-))}
+
+                        <Box component='span' sx={{ width: '30%', float: 'left', textAlign: 'left' }}>
+                            <IconButton sx={{ padding: '2px', paddingTop: '0px' }} onClick={() => handleDecrementarCantidad(productoCarrito.id)} disabled={productoCarrito.cantidad === 1}>
+                                <MinusCircle />
+                            </IconButton>
+                            <Typography component='span' sx={{ margin: '0' }}>
+                                {productoCarrito.cantidad}
+                            </Typography>
+                            <IconButton sx={{ padding: '2px', paddingTop: '0px' }} onClick={() => handleIncrementarCantidad(productoCarrito.id)}>
+                                <PlusCircle />
+                            </IconButton>
+                            <IconButton sx={{ padding: '2px', paddingTop: '0px' }} onClick={() => handleEliminarProducto(productoCarrito.id)}>
+                                <Delete sx={{ color: "#ff3e1d" }} />
+                            </IconButton>
+                        </Box>
+
+                        <Box component='span' sx={{ fontWeight: 500, width: '15%', float: 'left', textAlign: 'right' }}>
+                            <Typography variant='body2' sx={{padding: 0 }}>
+                                {/* {productoCarrito.precio}*/}
+                                ${(productoCarrito.precio_descuento ?? 0) * (productoCarrito.cantidad ?? 0)}
+                            </Typography>
+                        </Box>
+                    </Card>
+                </Grid>
+                ))}
+                <Grid item xs={12} md={12} sx={{ textAlign: "right" }}>
+                    <Card sx={{ padding: '0.5rem !important' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                        Total: ${total}
+                        </Typography>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={12} sx={{ textAlign: "center" }}>
+                    <Button
+                        variant='contained'
+                        onClick={handleGuardarCarrito}
+                        sx={{ marginBottom: "15px" }}
+                    >
+                        Guardar
+                    </Button>
+                </Grid>
             </Menu>
         </Grid>
     )

@@ -1,101 +1,199 @@
-// ** MUI Imports
-import Grid from '@mui/material/Grid'
+import React, { useState, useEffect } from "react";
+import { Button, Card, Container, Row, Col } from "reactstrap";
+import { useNavigate, useParams } from "react-router-dom";
+//import NavbarSesion from "components/Navbars/NavbarSesion.js";
+//Service
+import { API_URL } from 'src/configs/constans'
+//Hook
+import { useAuth } from 'src/context/AuthProvider'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
 
-// ** Icons Imports
-import Poll from 'mdi-material-ui/Poll'
-import CurrencyUsd from 'mdi-material-ui/CurrencyUsd'
-import HelpCircleOutline from 'mdi-material-ui/HelpCircleOutline'
-import BriefcaseVariantOutline from 'mdi-material-ui/BriefcaseVariantOutline'
-
-// ** Custom Components Imports
-import CardStatisticsVerticalComponent from 'src/@core/components/card-statistics/card-stats-vertical'
-
-// ** Styled Component Import
-import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
-
-// ** Demo Components Imports
-import Table from 'src/views/dashboard/Table'
-import Trophy from 'src/views/dashboard/Trophy'
-import TotalEarning from 'src/views/dashboard/TotalEarning'
-import StatisticsCard from 'src/views/dashboard/StatisticsCard'
-import WeeklyOverview from 'src/views/dashboard/WeeklyOverview'
-import DepositWithdraw from 'src/views/dashboard/DepositWithdraw'
-import SalesByCountries from 'src/views/dashboard/SalesByCountries'
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard = () => {
-  return (
-    <ApexChartWrapper>
-      <Grid container spacing={6}>
-        <Grid item xs={12} md={4}>
-          <Trophy />
-        </Grid>
-        <Grid item xs={12} md={8}>
-          <StatisticsCard />
-        </Grid>
-        <Grid item xs={12} md={6} lg={4}>
-          <WeeklyOverview />
-        </Grid>
-        <Grid item xs={12} md={6} lg={4}>
-          <TotalEarning />
-        </Grid>
-        <Grid item xs={12} md={6} lg={4}>
-          <Grid container spacing={6}>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats='$25.6k'
-                icon={<Poll />}
-                color='success'
-                trendNumber='+42%'
-                title='Total Profit'
-                subtitle='Weekly Profit'
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats='$78'
-                title='Refunds'
-                trend='negative'
-                color='secondary'
-                trendNumber='-15%'
-                subtitle='Past Month'
-                icon={<CurrencyUsd />}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats='862'
-                trend='negative'
-                trendNumber='-18%'
-                title='New Project'
-                subtitle='Yearly Project'
-                icon={<BriefcaseVariantOutline />}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats='15'
-                color='warning'
-                trend='negative'
-                trendNumber='-18%'
-                subtitle='Last Week'
-                title='Sales Queries'
-                icon={<HelpCircleOutline />}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={12} md={6} lg={4}>
-          <SalesByCountries />
-        </Grid>
-        <Grid item xs={12} md={12} lg={8}>
-          <DepositWithdraw />
-        </Grid>
-        <Grid item xs={12}>
-          <Table />
-        </Grid>
-      </Grid>
-    </ApexChartWrapper>
-  )
-}
+  const sesion = useAuth();
+  const { idChef } = useParams();
+  //const history = useNavigate();
+  const [ventasPorChef, setVentasPorChef] = useState([]);
+  const [platosVendidos, setPlatosVendidos] = useState([]);
+  const [platosChef, setPlatosChef] = useState([]);
 
-export default Dashboard
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const, // Asegura que el valor sea uno de los permitidos
+      },
+      /* title: {
+        display: true,
+        text: "Ventas por chef",
+      }, */
+    },
+  };  
+
+  const labels = ["noviembre", "diciembre"];
+
+  //Solicitud
+  const fetchingVentasPorChef = async () => {
+    try {
+      const response = await fetch(`${API_URL}/dashboard/ventasPorChef`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (response.ok) {
+        const json = await response.json();
+
+        const clone = json.body.data.map((item: { nombreChef: any; totalVentas: any; }, i: number) => {
+          const hue = (i * 50) % 360; // Ajusta el 50 para obtener colores distintos
+          const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`;
+
+          return {
+            label: item.nombreChef,
+            data: [item.totalVentas],
+            backgroundColor: backgroundColor,
+          };
+        });
+
+        setVentasPorChef(clone);
+      } else {
+        const json = await response.json();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchingPlatosVendidos = async () => {
+    try {
+      const response = await fetch(`${API_URL}/dashboard/platosVendidos`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (response.ok) {
+        const json = await response.json();
+
+        const clone = json.body.data.map((item: { nombrePlato: any; totalVentas: any; }, i: number) => {
+          const hue = (i * 50) % 360; // Ajusta el 50 para obtener colores distintos
+          const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`;
+
+          return {
+            label: item.nombrePlato,
+            data: [item.totalVentas],
+            backgroundColor: backgroundColor,
+          };
+        });
+        setPlatosVendidos(clone);
+      } else {
+        const json = await response.json();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchingPlatosChef = async (id: string | undefined) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/dashboard/platosVendidos/${id}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.ok) {
+        const json = await response.json();
+
+        const clone = json.body.data.map((item: { nombrePlato: any; totalVentas: any; }, i: number) => {
+          const hue = (i * 50) % 360; // Ajusta el 50 para obtener colores distintos
+          const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`;
+
+          return {
+            label: item.nombrePlato,
+            data: [item.totalVentas],
+            backgroundColor: backgroundColor,
+          };
+        });
+        setPlatosChef(clone);
+      } else {
+        const json = await response.json();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  //DataSet
+  const data = {
+    labels,
+    datasets: ventasPorChef,
+  };
+
+  const dataDos = {
+    labels,
+    datasets: platosVendidos,
+  };
+
+  const dataTres = {
+    labels,
+    datasets: platosChef,
+  };
+
+  useEffect(() => {
+    fetchingVentasPorChef();
+    fetchingPlatosVendidos();
+  }, [sesion]);
+
+  useEffect(() => {
+    if (idChef !== "") {
+      fetchingPlatosChef(idChef);
+    }
+  }, [idChef]);
+  return (
+    <>
+      {/*<NavbarSesion />*/}
+      <main className="profile-page">
+        <section className="section-profile-cover section-shaped my-0">
+          <div className="mt-5 py-5 border-top text-center">
+            <Row className="justify-content-center mb-5">
+              <Col lg="12">
+                <h2>Ventas por chefs</h2>
+              </Col>
+              <Bar options={options} data={data} />
+            </Row>
+            <Row className="justify-content-center my-5">
+              <Col lg="12">
+                <h2>Platos vendidos de todos los chefs</h2>
+              </Col>
+              <Bar options={options} data={dataDos} />
+            </Row>
+            <Row className="justify-content-center my-5">
+              <Col lg="12">
+                <h2>
+                  Platos vendidos del chef {/*sesion?.info?.name ?? ""*/}
+                </h2>
+              </Col>
+              <Bar options={options} data={dataTres} />
+            </Row>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+};
+
+export default Dashboard;

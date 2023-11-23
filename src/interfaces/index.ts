@@ -8,12 +8,13 @@ export interface IProducto {
     precio?: number;
     cantidad?: number;
     mayoristas?: IMayorista[] | null;
-    
+    precio_descuento?: number;
 }
 
 export interface IMayorista {
-    id_mayorista: string;
+    id_mayorista: string | null;
     nombre_mayorista: string;
+    fecha_vencimiento? : Date | null;
     // Agrega otras propiedades según sea necesario
 }
 
