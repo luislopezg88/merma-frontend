@@ -5,6 +5,6 @@ export const API_URL =
 
 export const IMG_URL =
   process.env.NODE_ENV === "development"
-    ? "https://merma-backend.vercel.app/"
+    ? "http://localhost:3100/"
     : "https://merma-backend.vercel.app/";
 
