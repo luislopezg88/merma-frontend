@@ -16,6 +16,7 @@ import Button from '@mui/material/Button'
 import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
 import { Box, IconButton, Menu, Radio } from '@mui/material';
+import { IMG_URL } from 'src/configs/constans';
 
 const CardBasic = () => {
     const [productos, setProductos] = useState<IProducto[]>([]);
@@ -251,7 +252,7 @@ const CardBasic = () => {
                         <CardMedia 
                             sx={{   height: '9.375rem', backgroundColor: "#ffffff", backgroundSize: "contain",
                                     backgroundPosition: "center", backgroundRepeat: "no-repeat", borderBottom: "1px solid #ccc" }} 
-                            image={`${producto.imagen}`} 
+                            image={`${IMG_URL}imagenes/${producto.imagen}`} 
                         /> 
                         <CardContent sx={{ padding: theme => `${theme.spacing(3, 5.25, 4)} !important` }}>
                             <Typography variant='h6' sx={{ marginBottom: 2 }}>
