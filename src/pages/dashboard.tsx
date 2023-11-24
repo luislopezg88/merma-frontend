@@ -1,83 +1,71 @@
-import React, { useState, useEffect } from "react";
-import { Row, Col } from "reactstrap";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react'
+import { Row, Col } from 'reactstrap'
+import { useParams } from 'react-router-dom'
 //import NavbarSesion from "components/Navbars/NavbarSesion.js";
 //Service
 import { API_URL } from 'src/configs/constans'
 //Hook
 import { useAuth } from '../context/AuthProvider'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js/auto"; // Cambiado a "chart.js/auto"
-import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js/auto' // Cambiado a "chart.js/auto"
+import { Bar } from 'react-chartjs-2'
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const Dashboard = () => {
-  const auth = useAuth();
+  const auth = useAuth()
+  console.log(auth)
   //const history = useNavigate();
-  const [ventasPorChef, setVentasPorChef] = useState([]);
+  const [ventasPorChef, setVentasPorChef] = useState([])
 
   const options = {
     responsive: true,
     plugins: {
       legend: {
-        position: "top" as const, // Asegura que el valor sea uno de los permitidos
-      },
+        position: 'top' as const // Asegura que el valor sea uno de los permitidos
+      }
       /* title: {
         display: true,
         text: "Ventas por chef",
       }, */
-    },
-  };  
+    }
+  }
 
-  const labels = ["Noviembre", "Diciembre"];
+  const labels = ['Noviembre', 'Diciembre']
 
   //Solicitud
 
   const fetchingPlatosVendidos = async () => {
     try {
       const response = await fetch(`${API_URL}/dashboard/ventas/${auth.getUser()?.id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-  
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
       if (response.ok) {
-        const json = await response.json();
-  
-        const clone = json.body.data.map((item: { nombreProducto: any; totalVentas: any; porcentajeDescuento: any }, i: number) => {
-          const hue = (i * 50) % 360; // Ajusta el 50 para obtener colores distintos
-          const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`;
-  
-          return {
-            label: item.nombreProducto,
-            data: [item.totalVentas],
-            backgroundColor: backgroundColor,
-            porcentajeDescuento: item.porcentajeDescuento, // Nuevo campo para el porcentaje de descuento
-          };
-        });
-  
-        setVentasPorChef(clone);
+        const json = await response.json()
+
+        const clone = json.body.data.map(
+          (item: { nombreProducto: any; totalVentas: any; porcentajeDescuento: any }, i: number) => {
+            const hue = (i * 50) % 360 // Ajusta el 50 para obtener colores distintos
+            const backgroundColor = `hsla(${hue}, 70%, 50%, 0.5)`
+
+            return {
+              label: item.nombreProducto,
+              data: [item.totalVentas],
+              backgroundColor: backgroundColor,
+              porcentajeDescuento: item.porcentajeDescuento // Nuevo campo para el porcentaje de descuento
+            }
+          }
+        )
+
+        setVentasPorChef(clone)
       } else {
         // Manejar la respuesta no exitosa si es necesario
       }
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  };  
+  }
 
   //DataSet
   const data = {
@@ -85,22 +73,22 @@ const Dashboard = () => {
     datasets: ventasPorChef.map((item: { label: any; data: any; backgroundColor: any; porcentajeDescuento: any }) => ({
       label: `${item.label} (${item.porcentajeDescuento}%)`, // Etiqueta modificada para incluir el porcentaje de descuento
       data: item.data,
-      backgroundColor: item.backgroundColor,
-    })),
-  };
+      backgroundColor: item.backgroundColor
+    }))
+  }
 
   useEffect(() => {
-    fetchingPlatosVendidos();
-  }, [auth]);
+    fetchingPlatosVendidos()
+  }, [auth])
 
   return (
     <>
       {/*<NavbarSesion />*/}
-      <main className="profile-page">
-        <section className="section-profile-cover section-shaped my-0">
-          <div className="mt-5 py-5 border-top text-center">
-            <Row className="justify-content-center mb-5">
-              <Col lg="12">
+      <main className='profile-page'>
+        <section className='section-profile-cover section-shaped my-0'>
+          <div className='mt-5 py-5 border-top text-center'>
+            <Row className='justify-content-center mb-5'>
+              <Col lg='12'>
                 <h2>Ventas por productos</h2>
               </Col>
               <Bar options={options} data={data} />
@@ -109,7 +97,7 @@ const Dashboard = () => {
         </section>
       </main>
     </>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard
