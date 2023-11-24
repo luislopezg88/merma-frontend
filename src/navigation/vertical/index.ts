@@ -10,87 +10,63 @@ import AccountPlusOutline from 'mdi-material-ui/AccountPlusOutline'
 import AlertCircleOutline from 'mdi-material-ui/AlertCircleOutline'
 import GoogleCirclesExtended from 'mdi-material-ui/GoogleCirclesExtended'
 import ListStatus from 'mdi-material-ui/ViewList'
+import { useAuth } from '../../context/AuthProvider';
 
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 
 const navigation = (): VerticalNavItemsType => {
-  return [
+  const auth = useAuth();
+  const userRole = auth.getUser()?.rol;
+
+  const commonOptions = [
     {
       title: 'Inicio',
       icon: HomeOutline,
       path: '/'
     },
     {
-      title: 'Tienda',
-      icon: CreditCardOutline,
-      path: '/tienda'
-    },
-    {
-      title: 'Productos',
-      icon: ListStatus,
-      path: '/productos'
-    },
-    {
-      title: 'Inventario',
-      icon: Table,
-      path: '/inventario'
-    },
-    {
       title: 'Cuenta',
       icon: AccountCogOutline,
       path: '/account-settings'
     },
-    /*{
-      sectionTitle: 'Pages'
-    },
-    {
-      title: 'Login',
-      icon: Login,
-      path: '/pages/login',
-      openInNewTab: true
-    },
-    {
-      title: 'Register',
-      icon: AccountPlusOutline,
-      path: '/pages/register',
-      openInNewTab: true
-    },
-    {
-      title: 'Error',
-      icon: AlertCircleOutline,
-      path: '/pages/error',
-      openInNewTab: true
-    },
-    {
-      sectionTitle: 'User Interface'
-    },
-    {
-      title: 'Typography',
-      icon: FormatLetterCase,
-      path: '/typography'
-    },
-    {
-      title: 'Icons',
-      path: '/icons',
-      icon: GoogleCirclesExtended
-    },
-    {
-      title: 'Cards',
-      icon: CreditCardOutline,
-      path: '/cards'
-    },
-    {
-      title: 'Tables',
-      icon: Table,
-      path: '/tables'
-    },
-    {
-      icon: CubeOutline,
-      title: 'Form Layouts',
-      path: '/form-layouts'
-    }*/
-  ]
+  ];
+
+  if (userRole === 'mayorista') {
+    return [
+      ...commonOptions,
+      {
+        title: 'Tienda',
+        icon: CreditCardOutline,
+        path: '/tienda'
+      },
+      {
+        title: 'Productos',
+        icon: ListStatus,
+        path: '/productos'
+      },
+      {
+        title: 'Inventario',
+        icon: Table,
+        path: '/inventario'
+      },
+      // Puedes agregar más opciones específicas para mayoristas aquí
+    ];
+  } else if (userRole === 'cliente') {
+    return [
+      ...commonOptions,
+      {
+        title: 'Tienda',
+        icon: CreditCardOutline,
+        path: '/tienda'
+      },
+      // Puedes agregar más opciones específicas para clientes aquí
+    ];
+  }
+
+  // Puedes agregar más lógica para otros roles si es necesario
+
+  return commonOptions;
 }
 
 export default navigation
