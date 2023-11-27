@@ -100,6 +100,7 @@ const Home = () => {
       return;
     } else {
       try {
+        console.log('1');
         if(inventario.id != '' && inventario.id != null) { //update inventario
           const formData = new FormData();
 
@@ -137,7 +138,7 @@ const Home = () => {
 
           const bodySend = {
             ...inventario,
-            id_mayorista: "655c0129afd04e2f8a239a89" //auth.getUser()?.id
+            id_usuario: auth.getUser()?.id
           }
 
           const response = await fetch(`${API_URL}/productos/inventario`, {
@@ -156,6 +157,7 @@ const Home = () => {
           }
         }
       } catch (error) {
+        console.log('2');
         console.log(error);
       }
     }
