@@ -1,9 +1,7 @@
 import React, {useState, useEffect, forwardRef, ChangeEventHandler} from 'react'
 import { useAuth } from '../context/AuthProvider'
 import Card from '@mui/material/Card'
-import { styled } from '@mui/material/styles'
 import CardHeader from '@mui/material/CardHeader'
-import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import Grid, { GridProps } from '@mui/material/Grid'
 
@@ -13,18 +11,20 @@ import TextField from '@mui/material/TextField'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import DatePicker from 'react-datepicker'
-import MenuItem from '@mui/material/MenuItem'
-import Divider from '@mui/material/Divider'
-import Chip from '@mui/material/Chip'
-import { Box, IconButton, Input, InputAdornment } from '@mui/material'
+import { Alert, Box, Input } from '@mui/material'
 
 import { IProducto } from 'src/interfaces'
 import { API_URL } from 'src/configs/constans'
-import { AuthResponse, AuthResponseError } from 'src/configs/types'
+import { AuthResponse, AuthResponseError, IResponseError } from 'src/configs/types'
+import { AlertColor } from '@mui/material'
 
-const Home = () => {
+interface IMessage  {
+  show: boolean;
+  text: string;
+  type: AlertColor
+}
 
+const Producto = () => {
   const auth = useAuth();
   const [producto, setProducto] = useState<IProducto>({
     id: '',
@@ -35,13 +35,18 @@ const Home = () => {
 
   })
 
-  const [oportunidades, setOportunidades] = useState([])
   const [errorResponse, setErrorResponse] = useState("")
   const [date, setDate] = useState<Date | null | undefined>(null)
   const [img, setImg] = useState<File | null>(null)
   const CustomInput = forwardRef((props, ref) => {
     return <TextField fullWidth {...props} inputRef={ref} label='Birth Date' autoComplete='off' />
   })
+  const [message, setMessage] = useState<IMessage>({
+    show: false,
+    text: '',
+    type: 'success'
+  })
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     
@@ -70,7 +75,12 @@ const Home = () => {
     // auth.setIsAuthenticated(true);
     console.log(API_URL);
     if(producto.nombre == '' || producto.descripcion == ''){
-      alert('debe llenar todos los campos')
+      //alert('debe llenar todos los campos')
+      setMessage({
+        show: true,
+        text: 'Debe llenar el nombre y la descripción',
+        type: 'error'
+      })
       return 
     } else {
       try {
@@ -96,9 +106,23 @@ const Home = () => {
           if (response.ok) {
             const json = (await response.json()) as AuthResponse;
             console.log(json);
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: 'Datos actualizados correctamente',
+                type: 'success'
+              })
+            }, 1000);
           } else {
-            const json = (await response.json()) as AuthResponseError;
-            setErrorResponse(json.body.error);
+            const json = (await response.json()) as IResponseError;
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: json.error,
+                type: 'error'
+              })
+            }, 1000);
+            setErrorResponse(json.error);
           }
         } else { //create producto
           const formData = new FormData();
@@ -122,9 +146,23 @@ const Home = () => {
           if (response.ok) {
             const json = (await response.json()) as AuthResponse;
             console.log(json);
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: 'Datos actualizados correctamente',
+                type: 'success'
+              })
+            }, 1000);
           } else {
-            const json = (await response.json()) as AuthResponseError;
-            setErrorResponse(json.body.error);
+            const json = (await response.json()) as IResponseError;
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: json.error,
+                type: 'error'
+              })
+            }, 1000);
+            setErrorResponse(json.error);
           }
         }
       } catch (error) {
@@ -223,6 +261,24 @@ const Home = () => {
                 </Box> 
               </Grid>
             </Grid>
+
+            {message.show &&
+            <Grid container spacing={6}>
+              <Grid item xs={12} sm={12} sx={{ mt: 6 }} >
+                <Alert
+                  variant="filled" severity={message.type} 
+                  onClose={() => {
+                    setMessage({
+                      ...message,
+                      show: false
+                    })
+                  }}
+                >
+                  { message.text }
+                </Alert>
+              </Grid> 
+            </Grid>
+            }
             
           </CardContent>
         </Card>
@@ -232,4 +288,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Producto

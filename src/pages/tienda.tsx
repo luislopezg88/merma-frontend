@@ -15,8 +15,16 @@ import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
-import { Box, IconButton, Menu, Radio } from '@mui/material';
+import { Alert, Box, IconButton, Menu, Radio } from '@mui/material';
 import { IMG_URL } from 'src/configs/constans';
+import { AuthResponse, AuthResponseError, IResponseError } from 'src/configs/types'
+import { AlertColor } from '@mui/material'
+
+interface IMessage  {
+  show: boolean;
+  text: string;
+  type: AlertColor
+}
 
 const CardBasic = () => {
     const [productos, setProductos] = useState<IProducto[]>([]);
@@ -24,6 +32,11 @@ const CardBasic = () => {
     const [selectedMayoristas, setSelectedMayoristas] = useState<{ [key: string]: string | null }>({});
     const [carrito, setCarrito] = useState<IProducto[]>([]);
     const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+    const [message, setMessage] = useState<IMessage>({
+        show: false,
+        text: '',
+        type: 'success'
+      })
     const auth = useAuth();
     // ** Hooks
     const router = useRouter()
@@ -66,22 +79,6 @@ const CardBasic = () => {
         }));
     };
 
-    {/*const handleAgregarAlCarrito = () => {
-        if (selectedProduct) {
-            const mayoristaId = selectedMayoristas[selectedProduct.id];
-            const mayorista = selectedProduct.mayoristas?.find(m => m.id_mayorista === mayoristaId);
-            const productoConMayorista = {
-                ...selectedProduct,
-                mayoristas: mayorista ? [mayorista] : [],
-                cantidad: 1, // Cantidad predeterminada
-            };
-            setCarrito(prevCarrito => [...prevCarrito, productoConMayorista]);
-            // Limpiar la selección actual después de agregar al carrito
-            setSelectedProduct(null);
-            setSelectedMayoristas({});
-        }
-    };*/}
-
     const handleAgregarAlCarrito = () => {
         if (selectedProduct) {
           const mayoristaId = selectedMayoristas[selectedProduct.id];
@@ -111,10 +108,26 @@ const CardBasic = () => {
               precio_descuento: precioConDescuento,
             },
           ]);
+
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: 'Producto agregado correctamente',
+                type: 'success'
+              })
+            }, 1000);
       
           // Limpiar la selección actual después de agregar al carrito
           setSelectedProduct(null);
           setSelectedMayoristas({});
+
+          // Oculta el mensaje después de 2 segundos
+          setTimeout(() => {
+            setMessage({
+                ...message,
+                show: false,
+            });
+        }, 2000);
         }
     };      
 
@@ -193,6 +206,27 @@ const CardBasic = () => {
           if (response.ok) {
             // Los datos se guardaron exitosamente en la base de datos
             console.log('Los datos del carrito se guardaron correctamente.');
+            setTimeout(() => {
+                setMessage({
+                  show: true,
+                  text: 'Proceso realizado exitosamente',
+                  type: 'success'
+                })
+              }, 1000);
+
+            // Vacía el carrito después de guardar
+            setCarrito([]);
+
+            // Oculta el mensaje después de 2 segundos
+            setTimeout(() => {
+                setMessage({
+                    ...message,
+                    show: false,
+                });
+            }, 2000);
+
+            // Cierra la sección del carrito (menú)
+            handleDropdownClose();
           } else {
             // Ocurrió un error al guardar los datos en la base de datos
             console.error('Error al guardar los datos del carrito.');
@@ -245,6 +279,24 @@ const CardBasic = () => {
                     Ver Carrito
                 </Button>
             </Grid>
+
+            {message.show &&
+            <Grid container spacing={6}>
+              <Grid item xs={12} sm={12} sx={{ mt: 6 }} >
+                <Alert
+                  variant="filled" severity={message.type} 
+                  onClose={() => {
+                    setMessage({
+                      ...message,
+                      show: false
+                    })
+                  }}
+                >
+                  { message.text }
+                </Alert>
+              </Grid> 
+            </Grid>
+            }
             
             {productos.map((producto) => (
                 <Grid key={producto.id} item xs={12} sm={6} md={4}>
@@ -252,7 +304,7 @@ const CardBasic = () => {
                         <CardMedia 
                             sx={{   height: '9.375rem', backgroundColor: "#ffffff", backgroundSize: "contain",
                                     backgroundPosition: "center", backgroundRepeat: "no-repeat", borderBottom: "1px solid #ccc" }} 
-                            image={`${IMG_URL}imagenes/${producto.imagen}`} 
+                            image={`${IMG_URL}/${producto.imagen}`} 
                         /> 
                         <CardContent sx={{ padding: theme => `${theme.spacing(3, 5.25, 4)} !important` }}>
                             <Typography variant='h6' sx={{ marginBottom: 2 }}>

@@ -25,3 +25,7 @@ export interface AccessTokenResponse {
   };
   error?: string;
 }
+
+export interface IResponseError {
+  error: string;
+}

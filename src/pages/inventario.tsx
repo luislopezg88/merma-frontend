@@ -1,33 +1,30 @@
 import React, {useState, useEffect, forwardRef, ChangeEventHandler} from 'react'
 import { useAuth } from '../context/AuthProvider'
 import Card from '@mui/material/Card'
-import { styled } from '@mui/material/styles'
 import CardHeader from '@mui/material/CardHeader'
-import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
-import Grid, { GridProps } from '@mui/material/Grid'
+import Grid from '@mui/material/Grid'
 
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import InputLabel from '@mui/material/InputLabel'
-import FormControl from '@mui/material/FormControl'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-// import DatePicker from 'react-datepicker';
-// import 'react-datepicker/dist/react-datepicker.css';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import MenuItem from '@mui/material/MenuItem'
-import Divider from '@mui/material/Divider'
-import Chip from '@mui/material/Chip'
-import { Autocomplete, AutocompleteChangeDetails, Box, IconButton, Input, InputAdornment } from '@mui/material'
+import { Alert, Autocomplete, AutocompleteChangeDetails, Box, IconButton, Input, InputAdornment } from '@mui/material'
 
 import { IInventario } from 'src/interfaces'
 import { IProducto } from 'src/interfaces'
 import { API_URL } from 'src/configs/constans'
-import { AuthResponse, AuthResponseError } from 'src/configs/types'
+import { AuthResponse, AuthResponseError, IResponseError } from 'src/configs/types'
+import { AlertColor } from '@mui/material'
 
-const Home = () => {
+interface IMessage  {
+  show: boolean;
+  text: string;
+  type: AlertColor
+}
+
+const Inventario = () => {
     const auth = useAuth();
     const [inventario, setInventario] = useState<IInventario>({
         id: '',
@@ -36,13 +33,13 @@ const Home = () => {
         fecha_vencimiento: null,
       });
 
-  const [oportunidades, setOportunidades] = useState([])
   const [errorResponse, setErrorResponse] = useState("")
-  const [date, setDate] = useState<Date | null | undefined>(null)
-  const CustomInput = forwardRef((props, ref) => {
-    return <TextField fullWidth {...props} inputRef={ref} label='Fecha de Vencimiento' autoComplete='off' />
-  })
   const [productos, setProductos] = useState<IProducto[]>([]);
+  const [message, setMessage] = useState<IMessage>({
+    show: false,
+    text: '',
+    type: 'success'
+  })
 
   useEffect(() => {
     getProductosData();
@@ -96,7 +93,12 @@ const Home = () => {
     console.log('API_URL: '+API_URL);
 
     if (!inventario.id_producto || (!inventario.cantidad && inventario.cantidad !== 0)) {
-      alert('Debe llenar todos los campos');
+      //alert('Debe llenar todos los campos');
+      setMessage({
+        show: true,
+        text: 'Debe seleccionar el producto y llenar la cantidad',
+        type: 'error'
+      })
       return;
     } else {
       try {
@@ -123,9 +125,23 @@ const Home = () => {
           if (response.ok) {
             const json = (await response.json()) as AuthResponse;
             console.log(json);
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: 'Datos actualizados correctamente',
+                type: 'success'
+              })
+            }, 1000);
           } else {
-            const json = (await response.json()) as AuthResponseError;
-            setErrorResponse(json.body.error);
+            const json = (await response.json()) as IResponseError;
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: json.error,
+                type: 'error'
+              })
+            }, 1000);
+            setErrorResponse(json.error);
           }
         } else { //create inventario
           const formData = new FormData();
@@ -137,7 +153,7 @@ const Home = () => {
 
           const bodySend = {
             ...inventario,
-            id_mayorista: "655c0129afd04e2f8a239a89" //auth.getUser()?.id
+            id_usuario: auth.getUser()?.id
           }
 
           const response = await fetch(`${API_URL}/productos/inventario`, {
@@ -150,9 +166,23 @@ const Home = () => {
           if (response.ok) {
             const json = (await response.json()) as AuthResponse;
             console.log(json);
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: 'Datos actualizados correctamente',
+                type: 'success'
+              })
+            }, 1000);
           } else {
-            const json = (await response.json()) as AuthResponseError;
-            setErrorResponse(json.body.error);
+            const json = (await response.json()) as IResponseError;
+            setTimeout(() => {
+              setMessage({
+                show: true,
+                text: json.error,
+                type: 'error'
+              })
+            }, 1000);
+            setErrorResponse(json.error);
           }
         }
       } catch (error) {
@@ -236,6 +266,24 @@ const Home = () => {
               </Grid>
             </Grid>
 
+            {message.show &&
+            <Grid container spacing={6}>
+              <Grid item xs={12} sm={12} sx={{ mt: 6 }} >
+                <Alert
+                  variant="filled" severity={message.type} 
+                  onClose={() => {
+                    setMessage({
+                      ...message,
+                      show: false
+                    })
+                  }}
+                >
+                  { message.text }
+                </Alert>
+              </Grid> 
+            </Grid>
+            }
+
           </CardContent>
         </Card>
 
@@ -244,4 +292,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Inventario;

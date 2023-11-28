@@ -23,7 +23,7 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Inicio',
       icon: HomeOutline,
-      path: '/'
+      path: '/dashboard'
     },
     {
       title: 'Cuenta',
