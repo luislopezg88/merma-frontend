@@ -102,6 +102,7 @@ const Inventario = () => {
       return;
     } else {
       try {
+        console.log('1');
         if(inventario.id != '' && inventario.id != null) { //update inventario
           const formData = new FormData();
 
@@ -186,6 +187,7 @@ const Inventario = () => {
           }
         }
       } catch (error) {
+        console.log('2');
         console.log(error);
       }
     }

@@ -14,6 +14,10 @@ export interface IProducto {
 export interface IMayorista {
     id_mayorista: string | null;
     nombre_mayorista: string;
+    descripcion: string;
+    telefono: string;
+    ubicacion: string;
+    id_user: string;
     fecha_vencimiento? : Date | null;
     // Agrega otras propiedades según sea necesario
 }
